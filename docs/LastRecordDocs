@@ -1,0 +1,20 @@
+When a client wants the time of the last record posted for its account, it will
+issue a GET request to the designated path on the server, with a query string
+containing the following fields:
+
+game_id
+
+game_id is a number (currently) from 1 to 4, identifying one of the touhou
+fighting games. Currently, 1 corresponds to SWR, 2 to Soku, 3 to HM demo,
+and 4 to HM.
+
+
+account_name
+
+The username of the account
+
+
+When successfully getting the last report time, the server should send a message
+with response code 200 (Ok) containing the time, in ISO8601 format. If there is
+no previous report, the server should send an empty message with response code
+204 (No Content)
