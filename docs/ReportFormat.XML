@@ -1,0 +1,28 @@
+<!-- A track record looks like this in XML: -->
+
+<trackrecordPosting>
+
+    <account>
+        <name>username</name>       <!-- The account name -->
+        <password>AF32BA</password> <!-- Hashed password (This is pointless,
+	                                 if you write a server please hash again serverside) -->
+    </account>
+
+    <game>
+        <id>?????</id>              <!-- I don't know the format of the game id yet or what it does -->
+
+        <trackrecord>               <!-- A <game> element can have any amount of <trackrecord> elements -->
+            <timestamp>12394859493</timestamp> <!-- The match timestamp from tsk -->
+            <p1name>Reimu Raymoo</p1name>
+            <p1type>0</p1type>      <!-- Number corresponding to a character. I don't know them. -->
+            <p1point>2</p1point>    <!-- Number of rounds p1 won -->
+            <p2name>Ruinan Ding</p2name>
+            <p2type>15</p2type>
+            <p2point>1</p2point>
+        </trackrecord>
+
+    </game>
+
+    <is_force_insert></is_force_insert> <!-- Optional element that activates force insert -->
+
+</trackrecordPosting>
