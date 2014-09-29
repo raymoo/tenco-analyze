@@ -21,6 +21,8 @@
             <p2point>1</p2point>
         </trackrecord>
 
+        <!-- [more <trackrecord>s] -->
+
     </game>
 
     <is_force_insert></is_force_insert> <!-- Optional element that activates force insert -->
