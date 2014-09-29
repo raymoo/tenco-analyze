@@ -9,7 +9,7 @@
     </account>
 
     <game>
-        <id>?????</id>              <!-- I don't know the format of the game id yet or what it does -->
+        <id>2</id>              <!-- Identifies a game: 1=SWR 2=Soku 3=Demo HM 4=HM -->
 
         <trackrecord>               <!-- A <game> element can have any amount of <trackrecord> elements -->
             <timestamp>12394859493</timestamp> <!-- The match timestamp from tsk -->
@@ -25,6 +25,6 @@
 
     </game>
 
-    <is_force_insert></is_force_insert> <!-- Optional element that activates force insert -->
+    <is_force_insert /> <!-- Optional element that activates force insert -->
 
 </trackrecordPosting>
