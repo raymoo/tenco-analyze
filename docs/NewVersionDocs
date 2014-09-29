@@ -1,0 +1,6 @@
+A server can send the newest version of the reporter client in response to a GET request on the configured path.
+If a version number is sent, the response code should be 200 (Ok)
+
+This service is unnecessary for a ratings server - you can just point the client towards the official Tenco server. However, this could be useful for ensuring that the server supports the client version.
+
+This feature is really for clients, so it is only relevant to the tsk reporter. If you were writing your own client, you would probably have something similar.
