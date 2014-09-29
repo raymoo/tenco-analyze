@@ -1,0 +1,16 @@
+<!-- This is what a new account request looks like in XML -->
+
+<account>
+
+<name>username</name>
+
+<password>password</password>
+
+<mail_address>bob@bob.bob</mail_address> <!-- text may be blank -->
+
+</account>
+
+<!-- When this xml is posted to the right address, the server should create an
+     account. The server may choose to send some text back as a message to the
+     user. On a successful registration, response code 200 (Ok) should be sent.
+-->
