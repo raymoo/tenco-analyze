@@ -9,10 +9,10 @@
     </account>
 
     <game>
-        <id>2</id>              <!-- Identifies a game: 1=SWR 2=Soku 3=Demo HM 4=HM -->
+        <id>2</id>                  <!-- Identifies a game: 1=SWR 2=Soku 3=Demo HM 4=HM -->
 
         <trackrecord>               <!-- A <game> element can have any amount of <trackrecord> elements -->
-            <timestamp>12394859493</timestamp> <!-- The match timestamp from tsk -->
+            <timestamp>2014-09-27T22:52:00+00:00</timestamp> <!-- The match timestamp in ISO8601 format -->
             <p1name>Reimu Raymoo</p1name>
             <p1type>0</p1type>      <!-- Number corresponding to a character. I don't know them. -->
             <p1point>2</p1point>    <!-- Number of rounds p1 won -->
@@ -25,6 +25,6 @@
 
     </game>
 
-    <is_force_insert /> <!-- Optional element that activates force insert -->
+    <is_force_insert />             <!-- Optional element that activates force insert -->
 
 </trackrecordPosting>
