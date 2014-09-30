@@ -24,32 +24,37 @@ import           Control.Applicative
 import           Snap.Core
 import           Snap.Util.FileServe
 import           Snap.Http.Server
-import           Data.Soku.Requests
 import           Data.Soku.Requests.Xml
+import           Data.Soku.Accounts
+import           Data.Acid (AcidState)
+import           Data.Acid.Local (openLocalState)
+import           Control.Monad.IO.Class (liftIO)
+import           Data.ByteString.Char8 (pack)
 
 main :: IO ()
-main = quickHttpServe site
+main = openLocalState emptyAccList >>=
+       quickHttpServe . site
 
-site :: Snap ()
-site =
+site :: AcidState AccountList -> Snap ()
+site astate =
     ifTop (writeBS "Basic server that doesn't do anything interesting.") <|>
     route [ ("api/last_track_record", writeBS "2010-09-27T22:52:00+00:00")
-          , ("api/account", newAccountHandler)
+          , ("api/account", newAccountHandler astate)
           , ("api/track_record", matchRecordHandler)
           , ("game/:id/account/:username", accountHandler)
           ] <|>
     writeBS "There is nothing here." <|>
     dir "static" (serveDirectory ".") -- This will never handle anything as the code is currently written
 
-newAccountHandler :: Snap ()
-newAccountHandler = 
+newAccountHandler :: AcidState AccountList -> Snap ()
+newAccountHandler astate = 
     parseNewAccount <$> readRequestBody maxBound >>= 
     maybe ((modifyResponse $ setResponseStatus 400 "Bad input") >> writeBS "400: Bad input")
-          (\req ->
-           writeBS "Username: " >> writeText (newName req) >>
-           writeBS "\nPassword: " >> writeText (newPassword req) >>
-           writeBS "\nEmail: " >> writeText (newMail req) >>
-           writeBS "\nThis is a test. No account information has been recorded.")
+          tryToRegister
+        where tryToRegister accReq = liftIO (registerAccount astate accReq) >>=
+                                     maybe (writeBS "Success") 
+                                           (modifyResponse . setResponseStatus 400 . pack . show)
+                                     
 
 matchRecordHandler :: Snap ()
 matchRecordHandler =
