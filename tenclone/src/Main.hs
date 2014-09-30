@@ -12,7 +12,7 @@ main = quickHttpServe site
 site :: Snap ()
 site =
     ifTop (writeBS "Basic server that doesn't do anything interesting.") <|>
-    route [ ("foo", writeBS "bar")
+    route [ ("api/last_track_record", writeBS "2010-09-27T22:52:00+00:00")
           , ("game/:id/account/:username", accountHandler)
           ] <|>
     writeBS "There is nothing here." <|>
