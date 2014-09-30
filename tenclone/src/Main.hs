@@ -43,7 +43,7 @@ main = openLocalState emptyAccList >>=
 
 site :: AcidState AccountList -> Snap ()
 site astate =
-    ifTop (writeLBS $ renderHtml indexPage) <|>
+    ifTop (indexHandler astate) <|>
     route [ ("api/last_track_record", writeBS "2010-09-27T22:52:00+00:00")
           , ("api/account", newAccountHandler astate)
           , ("api/track_record", matchRecordHandler)
@@ -52,6 +52,11 @@ site astate =
           ] <|>
     writeBS "There is nothing here." <|>
     dir "static" (serveDirectory ".") -- This will never handle anything as the code is currently written
+
+indexHandler :: AcidState AccountList -> Snap ()
+indexHandler astate = 
+    indexPage <$> liftIO (playerList astate) >>=
+    writeLBS . renderHtml
 
 newAccountHandler :: AcidState AccountList -> Snap ()
 newAccountHandler astate = 

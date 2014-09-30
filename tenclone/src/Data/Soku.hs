@@ -17,9 +17,12 @@
     along with Tenclone.  If not, see <http://www.gnu.org/licenses/>.
 -}
 
+{-# LANGUAGE DeriveDataTypeable #-}
 module Data.Soku ( Character(..)
                  , GameId(..)
                  ) where
+
+import Data.Data
 
 -- | Enumerates the different characters in hisoutensoku
 data Character = Suika
@@ -42,7 +45,7 @@ data Character = Suika
                | Komachi
                | Iku
                | Tenshi
-                 deriving (Eq, Ord, Show)
+                 deriving (Eq, Ord, Show, Data, Typeable)
 
 -- | Enumerates the different possible games
 data GameId = SWR

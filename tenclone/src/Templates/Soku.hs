@@ -18,22 +18,25 @@
 -}
 
 {-# LANGUAGE OverloadedStrings #-}
-module Templates.Soku where
+module Templates.Soku(
+                      indexPage
+                     ) where
 
 import Text.Blaze.Html5
 import Text.Blaze.Html5.Attributes
+import Text.Blaze.Internal (textValue)
 import qualified Text.Blaze.Html5 as H
 import qualified Text.Blaze.Html5.Attributes as A
 import Data.Text (Text)
+import Data.Text as T (append)
 
 -- | Fix to Text
 wombo :: Text -> Text
 wombo = Prelude.id
 
 -- | Index page done in blaze because I am lazy
-
-indexPage :: Html
-indexPage = 
+indexPage :: [Text] -> Html
+indexPage ps = 
     docTypeHtml $ do
       H.head $ do
         H.title "Welcome to Tenclone!"
@@ -45,8 +48,31 @@ indexPage =
         br
         H.form ! action "search" $ do
           toHtml $ wombo "Username: "
+          br
           input ! type_ "text" ! name "username"
           br
+          br
           toHtml $ wombo "Game ID: "
+          br
           input ! type_ "text" ! name "id"
-          input ! type_ "submit" ! value "Search"
+          br
+          input ! type_ "submit" ! value "Go"
+        br
+        br
+        toHtml $ wombo "Players:"
+        br
+        playerList ps
+
+playerList :: [Text] -> Html
+playerList ps = table $ mapM_ playerRow ps
+    where playerRow pl =
+              tr $ do
+                td $ toHtml pl
+                mapM_ (td . profileLink pl) ["1","2","3","4"]
+
+type GameID = Text
+type Username = Text
+
+profileLink :: Username -> GameID -> Html
+profileLink pName gid = a ! href (textValue profAddress) $ toHtml gid
+  where profAddress = "game/" `T.append` gid `T.append` "/account/" `T.append` pName
