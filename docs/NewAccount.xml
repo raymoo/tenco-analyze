@@ -13,4 +13,7 @@
 <!-- When this xml is posted to the right address, the server should create an
      account. The server may choose to send some text back as a message to the
      user. On a successful registration, response code 200 (Ok) should be sent.
+     A server should at least allow usernames of up to 32 alphanumeric
+     characters plus underscores, passwords between 4 and 16 bytes, and mail
+     addresses of up to 256 bytes.
 -->
