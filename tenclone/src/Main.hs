@@ -11,7 +11,7 @@ main = quickHttpServe site
 
 site :: Snap ()
 site =
-    ifTop (writeBS "Server not operational yet!") <|>
+    ifTop (writeBS "Basic server that doesn't do anything interesting.") <|>
     route [ ("foo", writeBS "bar")
           , ("game/:id/account/:username", accountHandler)
           ] <|>
