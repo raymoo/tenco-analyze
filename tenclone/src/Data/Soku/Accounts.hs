@@ -48,6 +48,7 @@ accMail = newMail
 
 -- | List of registered accounts
 data AccountList = AccountList { accList :: Map.Map T.Text Account }
+                   deriving (Data, Typeable)
 
 $(deriveSafeCopy 0 'base  ''AccountList)
 
