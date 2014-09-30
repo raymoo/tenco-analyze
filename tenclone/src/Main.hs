@@ -30,6 +30,9 @@ import           Data.Acid (AcidState)
 import           Data.Acid.Local (openLocalState)
 import           Control.Monad.IO.Class (liftIO)
 import           Data.ByteString.Char8 (pack)
+import           Data.Text.Encoding (decodeUtf8)
+import           Data.Traversable as Trav (mapM)
+import           Control.Monad (join)
 
 main :: IO ()
 main = openLocalState emptyAccList >>=
@@ -41,7 +44,7 @@ site astate =
     route [ ("api/last_track_record", writeBS "2010-09-27T22:52:00+00:00")
           , ("api/account", newAccountHandler astate)
           , ("api/track_record", matchRecordHandler)
-          , ("game/:id/account/:username", accountHandler)
+          , ("game/:id/account/:username", accountHandler astate)
           ] <|>
     writeBS "There is nothing here." <|>
     dir "static" (serveDirectory ".") -- This will never handle anything as the code is currently written
@@ -65,14 +68,11 @@ matchRecordHandler =
     readRequestBody maxBound >>= writeLBS >>
     writeBS "\nThis is a test. No reports were recorded."
 
-accountHandler :: Snap ()
-accountHandler = do
-    gId <- getParam "id"
-    username <- getParam "username"
-    let maybeHolder = makeAccountPlaceholder <$> gId <*> username
-    maybe (writeBS "bad parameters") id maybeHolder
-        where makeAccountPlaceholder gId aName = 
-                  writeBS "In the future, this page will display the stats of " >>
-                  writeBS aName >>
-                  writeBS " for the game of id " >>
-                  writeBS gId
+accountHandler :: AcidState AccountList -> Snap ()
+accountHandler astate = 
+    getParam "username" >>= \username ->
+    Trav.mapM (liftIO . findAccount astate . decodeUtf8) username >>=
+    maybe (modifyResponse (setResponseStatus 404 "Nonexistent Account") >>
+           Trav.mapM writeBS username >> writeBS " is not registered.")
+          ((writeBS "Found account: " >>) . writeText . accName) . join
+
