@@ -23,7 +23,11 @@ module Data.Soku.Accounts(
                          , accName
                          , accPass
                          , accMail
+                         , AccountList(..)
                          , emptyAccList
+                         , RegError(..)
+                         , RegUpdate
+                         , QueryAccount
                          ) where
 
 import Data.Map as Map (Map, member, insert, empty, lookup)
@@ -76,6 +80,7 @@ regUpdate acc = register <$> get <*> pure acc >>= \result ->
                        (\list -> put list >> return Nothing)
                        result
 
+-- | Gets the account with this name
 queryAccount :: T.Text -> Query AccountList (Maybe Account)
 queryAccount name = lookupAcc
     where lookupAcc = Map.lookup name . accList <$> ask
