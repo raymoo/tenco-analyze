@@ -17,7 +17,7 @@
     along with Tenclone.  If not, see <http://www.gnu.org/licenses/>.
 -}
 
-{-# LANGUAGE DeriveDataTypeable, TemplateHaskell, TypeFamilies #-}
+{-# LANGUAGE DeriveDataTypeable, TemplateHaskell, TypeFamilies, OverloadedStrings #-}
 module Data.Soku.Accounts(
                            Account
                          , accName
@@ -26,8 +26,8 @@ module Data.Soku.Accounts(
                          , AccountList(..)
                          , emptyAccList
                          , RegError(..)
-                         , RegUpdate
-                         , QueryAccount
+                         , registerAccount
+                         , findAccount
                          ) where
 
 import Data.Map as Map (Map, member, insert, empty, lookup)
@@ -37,7 +37,7 @@ import Control.Monad.Reader
 import Control.Monad.State
 import Control.Applicative ((<$>), (<*>), pure)
 import Data.Data
-import Data.Acid (Query, Update, makeAcidic)
+import Data.Acid (AcidState, Query, Update, makeAcidic, query, update)
 import Data.SafeCopy 
 
 -- | Represents someone's account information
@@ -87,3 +87,8 @@ queryAccount name = lookupAcc
     where lookupAcc = Map.lookup name . accList <$> ask
 
 $(makeAcidic ''AccountList ['regUpdate, 'queryAccount])
+
+registerAccount :: AcidState AccountList -> Account -> IO (Maybe RegError)
+registerAccount astate acc = update astate (RegUpdate acc)
+
+findAccount = undefined
