@@ -28,9 +28,10 @@ module Data.Soku.Accounts(
                          , RegError(..)
                          , registerAccount
                          , findAccount
+                         , playerList
                          ) where
 
-import Data.Map as Map (Map, member, insert, empty, lookup)
+import Data.Map as Map (Map, member, insert, empty, lookup, keys)
 import Data.Soku.Requests
 import Data.Text as T
 import Control.Monad.Reader
@@ -86,10 +87,18 @@ queryAccount :: T.Text -> Query AccountList (Maybe Account)
 queryAccount name = lookupAcc
     where lookupAcc = Map.lookup name . accList <$> ask
 
-$(makeAcidic ''AccountList ['regUpdate, 'queryAccount])
+-- | Return a list of players
+listOfPlayers :: Query AccountList ([Text])
+listOfPlayers = getKeys <$> ask
+    where getKeys (AccountList as) = Map.keys as
+
+$(makeAcidic ''AccountList ['regUpdate, 'queryAccount, 'listOfPlayers])
 
 registerAccount :: AcidState AccountList -> Account -> IO (Maybe RegError)
 registerAccount astate acc = update astate (RegUpdate acc)
 
 findAccount :: AcidState AccountList -> T.Text -> IO (Maybe Account)
 findAccount astate name = query astate (QueryAccount name)
+
+playerList :: AcidState AccountList -> IO ([Text])
+playerList astate = query astate ListOfPlayers
