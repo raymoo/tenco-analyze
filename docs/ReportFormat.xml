@@ -37,4 +37,6 @@
     the user. I don't know if this can be mixed with the request for
     forced-insert mode. If recording the report is successful, the response
     should have code 200 (Ok).
+
+    NOTE: Player 1 is always the account the reporting player used.
 -->
