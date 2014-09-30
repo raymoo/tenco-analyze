@@ -56,14 +56,16 @@ site astate =
 newAccountHandler :: AcidState AccountList -> Snap ()
 newAccountHandler astate = 
     parseNewAccount <$> readRequestBody maxBound >>= 
-    maybe ((modifyResponse $ setResponseStatus 400 "Bad input") >> writeBS "400: Bad input")
+    maybe ((modifyResponse $ setResponseStatus 400 "Bad input") >> 
+           writeBS "400: Bad input")
           tryToRegister
-        where tryToRegister accReq = liftIO (registerAccount astate accReq) >>=
-                                     maybe (writeBS "Success") 
-                                           (\err ->
-                                            modifyResponse (setResponseStatus 400 "Registration Failed") >>
-                                            writeBS "400: Registration failed: " >>
-                                            (writeBS . pack) (show err))
+        where tryToRegister accReq =
+                  liftIO (registerAccount astate accReq) >>=
+                  maybe (writeBS "Success") 
+                        (\err ->
+                         modifyResponse (setResponseStatus 400 "Registration Failed") >>
+                         writeBS "400: Registration failed: " >>
+                         (writeBS . pack) (show err))
                                      
 
 matchRecordHandler :: Snap ()
