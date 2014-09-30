@@ -55,7 +55,7 @@ newAccountHandler astate =
                                      maybe (writeBS "Success") 
                                            (\err ->
                                             modifyResponse (setResponseStatus 400 "Registration Failed") >>
-                                            writeBS "Registration failed: " >>
+                                            writeBS "400: Registration failed: " >>
                                             (writeBS . pack) (show err))
                                      
 
