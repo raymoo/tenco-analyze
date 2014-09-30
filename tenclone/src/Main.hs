@@ -14,6 +14,7 @@ site =
     ifTop (writeBS "Basic server that doesn't do anything interesting.") <|>
     route [ ("api/last_track_record", writeBS "2010-09-27T22:52:00+00:00")
           , ("api/account", newAccountHandler)
+          , ("api/track_record", matchRecordHandler)
           , ("game/:id/account/:username", accountHandler)
           ] <|>
     writeBS "There is nothing here." <|>
@@ -24,7 +25,12 @@ newAccountHandler =
     writeBS "Your request body: \n" >>
     readRequestBody maxBound >>= writeLBS >>
     writeBS "\nThis is a test. No accounts were created."
-                    
+
+matchRecordHandler :: Snap ()
+matchRecordHandler =
+    writeBS "Your request body: \n" >>
+    readRequestBody maxBound >>= writeLBS >>
+    writeBS "\nThis is a test. No reports were recorded."
 
 accountHandler :: Snap ()
 accountHandler = do
