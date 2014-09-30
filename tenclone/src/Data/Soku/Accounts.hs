@@ -91,4 +91,5 @@ $(makeAcidic ''AccountList ['regUpdate, 'queryAccount])
 registerAccount :: AcidState AccountList -> Account -> IO (Maybe RegError)
 registerAccount astate acc = update astate (RegUpdate acc)
 
-findAccount = undefined
+findAccount :: AcidState AccountList -> T.Text -> IO (Maybe Account)
+findAccount astate name = query astate (QueryAccount name)
