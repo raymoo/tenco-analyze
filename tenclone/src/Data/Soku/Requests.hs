@@ -17,6 +17,7 @@
     along with Tenclone.  If not, see <http://www.gnu.org/licenses/>.
 -}
 
+{-# LANGUAGE DeriveDataTypeable, TemplateHaskell #-}
 module Data.Soku.Requests ( ISOTime
                           , NewAccountReq(..)
                           , MatchResult(..)
@@ -25,6 +26,8 @@ module Data.Soku.Requests ( ISOTime
 
 import Data.Soku
 import Data.Text (Text)
+import Data.Data
+import Data.SafeCopy
 
 type ISOTime = String
 
@@ -33,7 +36,16 @@ data NewAccountReq = NewAccountReq
     { newName     :: Text -- ^ Username
     , newPassword :: Text -- ^ Password
     , newMail     :: Text -- ^ Email
-    } deriving (Show)
+    } deriving (Show, Data, Typeable)
+
+-- This is necessary for being used in acid-state
+$(deriveSafeCopy 0 'base ''NewAccountReq)
+
+instance Eq NewAccountReq where
+    a1 == a2 = newName a1 == newName a2
+
+instance Ord NewAccountReq where
+    compare a1 a2 = compare (newName a1) (newName a2)
 
 data MatchResult = MatchResult
     { mrTimestamp :: ISOTime   -- ^ Timestamp of the match, from tsk
