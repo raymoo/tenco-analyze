@@ -53,7 +53,10 @@ newAccountHandler astate =
           tryToRegister
         where tryToRegister accReq = liftIO (registerAccount astate accReq) >>=
                                      maybe (writeBS "Success") 
-                                           (modifyResponse . setResponseStatus 400 . pack . show)
+                                           (\err ->
+                                            modifyResponse (setResponseStatus 400 "Registration Failed") >>
+                                            writeBS "Registration failed: " >>
+                                            (writeBS . pack) (show err))
                                      
 
 matchRecordHandler :: Snap ()
