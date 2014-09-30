@@ -33,6 +33,9 @@ import           Data.ByteString.Char8 (pack)
 import           Data.Text.Encoding (decodeUtf8)
 import           Data.Traversable as Trav (mapM)
 import           Control.Monad (join)
+import           Templates.Soku
+import           Text.Blaze.Html.Renderer.Utf8 (renderHtml)
+
 
 main :: IO ()
 main = openLocalState emptyAccList >>=
@@ -40,10 +43,11 @@ main = openLocalState emptyAccList >>=
 
 site :: AcidState AccountList -> Snap ()
 site astate =
-    ifTop (writeBS "Basic server that doesn't do anything interesting.") <|>
+    ifTop (writeLBS $ renderHtml indexPage) <|>
     route [ ("api/last_track_record", writeBS "2010-09-27T22:52:00+00:00")
           , ("api/account", newAccountHandler astate)
           , ("api/track_record", matchRecordHandler)
+          , ("search", accountHandler astate)
           , ("game/:id/account/:username", accountHandler astate)
           ] <|>
     writeBS "There is nothing here." <|>
