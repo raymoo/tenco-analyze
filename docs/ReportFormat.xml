@@ -39,4 +39,9 @@
     should have code 200 (Ok).
 
     NOTE: Player 1 is always the account the reporting player used.
+
+    NOTE: The timestamps will be affected by local time zone. This is because of
+    some uses of GetLocalTime rather than GetSystemTime in the source of
+    tensokukan. The reporter also uses Time.localTime in generating timestamps.
+    Casty from #hisouten found this, I don't take any credit.
 -->
