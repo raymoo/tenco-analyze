@@ -24,6 +24,8 @@ import           Control.Applicative
 import           Snap.Core
 import           Snap.Util.FileServe
 import           Snap.Http.Server
+import           Data.Soku.Requests
+import           Data.Soku.Requests.Xml
 
 main :: IO ()
 main = quickHttpServe site
@@ -41,9 +43,13 @@ site =
 
 newAccountHandler :: Snap ()
 newAccountHandler = 
-    writeBS "Your request body: \n" >>
-    readRequestBody maxBound >>= writeLBS >>
-    writeBS "\nThis is a test. No accounts were created."
+    parseNewAccount <$> readRequestBody maxBound >>= 
+    maybe ((modifyResponse $ setResponseStatus 400 "Bad input") >> writeBS "400: Bad input")
+          (\req ->
+           writeBS "Username: " >> writeText (newName req) >>
+           writeBS "\nPassword: " >> writeText (newPassword req) >>
+           writeBS "\nEmail: " >> writeText (newMail req) >>
+           writeBS "\nThis is a test. No account information has been recorded.")
 
 matchRecordHandler :: Snap ()
 matchRecordHandler =
