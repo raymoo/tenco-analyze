@@ -98,8 +98,8 @@ playerPage gid uname ms =
                mapM_ gameRow ms
     where gameRow (Match t 
                          g
-                         pName
                          _
+                         pName
                          oName
                          matched
                          won
