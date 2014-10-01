@@ -55,4 +55,6 @@ data GameId = SWR
             | Soku
             | HMDemo
             | HM
-              deriving (Eq, Ord, Show)
+              deriving (Eq, Ord, Show, Data, Typeable)
+
+$(deriveSafeCopy 0 'base ''GameId)
