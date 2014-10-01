@@ -17,7 +17,7 @@
     along with Tenclone.  If not, see <http://www.gnu.org/licenses/>.
 -}
 
-{-# LANGUAGE DeriveDataTypeable, TemplateHaskell #-}
+{-# LANGUAGE DeriveDataTypeable, TemplateHaskell, OverloadedStrings #-}
 module Data.Soku ( Character(..)
                  , GameId(..)
                  , parseId
