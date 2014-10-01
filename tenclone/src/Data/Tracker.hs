@@ -64,3 +64,12 @@ findAccount astate name = query astate (QueryAccount name)
 playerList :: AcidState TrackerDB -> IO ([Text])
 playerList astate = query astate ListOfPlayers
 
+-- | Inserts a match into the database
+addMatch :: Match -> Update (TrackerDB) ()
+addMatch m = modify $ modifyMatch (I.insert m)
+    where modifyMatch f tracker =
+              tracker { matchDB = f $ matchDB tracker }
+
+-- | Gets the matches a player reported.
+playersMatches :: Text -> Query (TrackerDB) ([Match])
+playersMatches name = I.toList . getEQ name . matchDB <$> ask

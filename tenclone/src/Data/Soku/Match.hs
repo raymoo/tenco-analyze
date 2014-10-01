@@ -1,6 +1,14 @@
 {-# LANGUAGE DeriveDataTypeable, TypeFamilies, TemplateHaskell, GeneralizedNewtypeDeriving #-}
 
-module Data.Soku.Match where
+module Data.Soku.Match (
+                         Matching
+                       , Match (..)
+                       , Username
+                       , PlayerName(..)
+                       , PlayerHandle(..)
+                       , OpponentName(..)
+                       , requestToMatch
+                       )where
 
 import Data.Soku.Requests
 import Data.Text (Text)
@@ -9,9 +17,13 @@ import Data.Time (UTCTime)
 import Data.Time.ISO8601 (parseISO8601)
 import Data.Data
 import Data.IxSet
-import Data.Acid (AcidState, Query, Update, makeAcidic, query, update)
 import Data.SafeCopy
+import Control.Monad.State
+import Control.Monad.Reader
 
+-- | Unmatched = no corresponding opponent report
+-- Unranked = Hasn't been factored into ranking yet
+-- Ranked = Has been factored into rating
 data Matching = Unmatched
               | Unranked
               | Ranked
@@ -19,7 +31,7 @@ data Matching = Unmatched
 
 $(deriveSafeCopy 0 'base ''Matching)
 
--- | Represents
+-- | Represents a match.
 data Match = Match
     { mTime         :: UTCTime    -- ^ What was the match's time?
     , mPlayerName   :: Text       -- ^ The name of the reporting player
@@ -34,6 +46,7 @@ data Match = Match
 
 type Username = Text
 
+-- | Makes a match log request into a match
 requestToMatch :: Username -> MatchResult -> Maybe Match
 requestToMatch user (MatchResult timestamp
                                  p1Name
@@ -71,3 +84,4 @@ instance Indexable Match where
                   , ixFun $ \m -> [mMatched m]
                   , ixFun $ \m -> [mPlayerChar m]
                   ]
+
