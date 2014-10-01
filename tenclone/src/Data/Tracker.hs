@@ -6,6 +6,8 @@ module Data.Tracker (
                     , registerAccount
                     , findAccount
                     , playerList
+                    , insertMatch
+                    , playerMatches
                     ) where
 
 import Data.Soku.Accounts
@@ -53,7 +55,17 @@ listOfPlayers :: Query TrackerDB ([Text])
 listOfPlayers = getKeys . accountDB <$> ask
     where getKeys (AccountList as) = Map.keys as
 
-$(makeAcidic ''TrackerDB ['regUpdate, 'queryAccount, 'listOfPlayers])
+-- | Inserts a match into the database
+addMatch :: Match -> Update (TrackerDB) ()
+addMatch m = modify $ modifyMatch (I.insert m)
+    where modifyMatch f tracker =
+              tracker { matchDB = f $ matchDB tracker }
+
+-- | Gets the matches a player reported.
+playersMatches :: Text -> Query (TrackerDB) ([Match])
+playersMatches name = I.toList . getEQ (PlayerName name) . matchDB <$> ask
+
+$(makeAcidic ''TrackerDB ['regUpdate, 'queryAccount, 'listOfPlayers, 'addMatch, 'playersMatches])
 
 registerAccount :: AcidState TrackerDB -> Account -> IO (Maybe RegError)
 registerAccount astate acc = A.update astate (RegUpdate acc)
@@ -64,12 +76,8 @@ findAccount astate name = query astate (QueryAccount name)
 playerList :: AcidState TrackerDB -> IO ([Text])
 playerList astate = query astate ListOfPlayers
 
--- | Inserts a match into the database
-addMatch :: Match -> Update (TrackerDB) ()
-addMatch m = modify $ modifyMatch (I.insert m)
-    where modifyMatch f tracker =
-              tracker { matchDB = f $ matchDB tracker }
+insertMatch :: AcidState TrackerDB -> Match -> IO ()
+insertMatch astate = A.update astate . AddMatch
 
--- | Gets the matches a player reported.
-playersMatches :: Text -> Query (TrackerDB) ([Match])
-playersMatches name = I.toList . getEQ name . matchDB <$> ask
+playerMatches :: AcidState TrackerDB -> Text -> IO [Match]
+playerMatches astate = query astate . PlayersMatches
