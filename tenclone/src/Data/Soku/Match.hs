@@ -83,6 +83,7 @@ newtype OpponentName = OpponentName Text
 
 instance Indexable Match where
     empty = ixSet [ ixFun $ \m -> [mTime m] 
+                  , ixFun $ \m -> [mGame m]
                   , ixFun $ \m -> [PlayerName $ mPlayerName m]
                   , ixFun $ \m -> [PlayerHandle $ mPlayerHandle m]
                   , ixFun $ \m -> [OpponentName $ mOpponentName m]
