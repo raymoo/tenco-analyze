@@ -19,7 +19,8 @@
 
 {-# LANGUAGE OverloadedStrings #-}
 module Templates.Soku(
-                      indexPage
+                       indexPage
+                     , playerPage
                      ) where
 
 import Text.Blaze.Html5
@@ -88,7 +89,13 @@ playerPage gid uname ms =
         h1 $ toHtml $ uname `append` "'s stats"
         br
         br
-        table $ mapM_ gameRow ms
+        table $ do 
+               tr $ do
+                     td $ toHtml $ wombo "Time"
+                     td $ toHtml $ wombo "Player"
+                     td $ toHtml $ wombo "Score"
+                     td $ toHtml $ wombo "Opponent"
+               mapM_ gameRow ms
     where gameRow (Match t 
                          g
                          pName
@@ -102,7 +109,7 @@ playerPage gid uname ms =
               tr $ do
                 td $ toHtml $ formatISO8601 t
                 td $ maybeBold won $ toHtml pName
-                td $ toHtml $ wombo $ scoreText score
+                td $ toHtml $ scoreText score
                 td $ maybeBold (not won) $ toHtml oName
           scoreText (score1, score2) = (T.pack . show) score1 `T.append`
                                        " - " `T.append`
