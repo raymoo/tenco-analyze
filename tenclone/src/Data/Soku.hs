@@ -20,6 +20,7 @@
 {-# LANGUAGE DeriveDataTypeable, TemplateHaskell #-}
 module Data.Soku ( Character(..)
                  , GameId(..)
+                 , intToId
                  ) where
 
 import Data.Data
@@ -58,3 +59,11 @@ data GameId = SWR
               deriving (Eq, Ord, Show, Data, Typeable)
 
 $(deriveSafeCopy 0 'base ''GameId)
+
+intToId :: Int -> Maybe GameId
+intToId x = case x of
+              1 -> Just SWR
+              2 -> Just Soku
+              3 -> Just HMDemo
+              4 -> Just HM
+              _ -> Nothing

@@ -3,7 +3,6 @@
 module Data.Soku.Match (
                          Matching
                        , Match (..)
-                       , Username
                        , PlayerName(..)
                        , PlayerHandle(..)
                        , OpponentName(..)
@@ -20,6 +19,7 @@ import Data.IxSet
 import Data.SafeCopy
 import Control.Monad.State
 import Control.Monad.Reader
+import Control.Applicative
 
 -- | Unmatched = no corresponding opponent report
 -- Unranked = Hasn't been factored into ranking yet
@@ -34,6 +34,7 @@ $(deriveSafeCopy 0 'base ''Matching)
 -- | Represents a match.
 data Match = Match
     { mTime         :: UTCTime    -- ^ What was the match's time?
+    , mGame         :: GameId     -- ^ Which game
     , mPlayerName   :: Text       -- ^ The name of the reporting player
     , mPlayerHandle :: Text       -- ^ In-game name of the player
     , mOpponentName :: Text       -- ^ The in-game name of their opponent
@@ -44,27 +45,31 @@ data Match = Match
     , mScore        :: (Int, Int) -- ^ Score, Reporter - Opponent
     } deriving (Eq, Ord, Show, Data, Typeable)
 
-type Username = Text
+type Name = Text
 
 -- | Makes a match log request into a match
-requestToMatch :: Username -> MatchResult -> Maybe Match
+requestToMatch :: Name -> MatchResult -> Maybe Match
 requestToMatch user (MatchResult timestamp
+                                 game
                                  p1Name
                                  p1Char
                                  p1Score
                                  p2Name
                                  p2Char
-                                 p2Score) = madeMatch `fmap` parseISO8601 timestamp
-    where madeMatch t =  Match { mTime         = t
-                               , mPlayerName   = user
-                               , mPlayerHandle = p1Name
-                               , mOpponentName = p2Name
-                               , mMatched      = Unmatched
-                               , mWon          = p1Score > p2Score
-                               , mPlayerChar   = p1Char
-                               , mOppChar      = p2Char
-                               , mScore        = (p1Score, p2Score)
-                               }
+                                 p2Score) = madeMatch <$> 
+                                            parseISO8601 timestamp <*>
+                                            intToId game
+    where madeMatch t g =  Match { mTime         = t
+                                 , mGame         = g
+                                 , mPlayerName   = user
+                                 , mPlayerHandle = p1Name
+                                 , mOpponentName = p2Name
+                                 , mMatched      = Unmatched
+                                 , mWon          = p1Score > p2Score
+                                 , mPlayerChar   = p1Char
+                                 , mOppChar      = p2Char
+                                 , mScore        = (p1Score, p2Score)
+                                 }
 $(deriveSafeCopy 0 'base ''Match)
 
 newtype PlayerName = PlayerName Text
