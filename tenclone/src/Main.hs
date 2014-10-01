@@ -25,6 +25,7 @@ import           Snap.Core
 import           Snap.Util.FileServe
 import           Snap.Http.Server
 import           Data.Soku.Requests.Xml
+import           Data.Tracker
 import           Data.Soku.Accounts
 import           Data.Acid (AcidState)
 import           Data.Acid.Local (openLocalState)
@@ -38,10 +39,10 @@ import           Text.Blaze.Html.Renderer.Utf8 (renderHtml)
 
 
 main :: IO ()
-main = openLocalState emptyAccList >>=
+main = openLocalState emptyDB >>=
        quickHttpServe . site
 
-site :: AcidState AccountList -> Snap ()
+site :: AcidState TrackerDB -> Snap ()
 site astate =
     ifTop (indexHandler astate) <|>
     route [ ("api/last_track_record", writeBS "2010-09-27T22:52:00+00:00")
@@ -53,12 +54,12 @@ site astate =
     writeBS "There is nothing here." <|>
     dir "static" (serveDirectory ".") -- This will never handle anything as the code is currently written
 
-indexHandler :: AcidState AccountList -> Snap ()
+indexHandler :: AcidState TrackerDB -> Snap ()
 indexHandler astate = 
     indexPage <$> liftIO (playerList astate) >>=
     writeLBS . renderHtml
 
-newAccountHandler :: AcidState AccountList -> Snap ()
+newAccountHandler :: AcidState TrackerDB -> Snap ()
 newAccountHandler astate = 
     parseNewAccount <$> readRequestBody maxBound >>= 
     maybe ((modifyResponse $ setResponseStatus 400 "Bad input") >> 
@@ -79,7 +80,7 @@ matchRecordHandler =
     readRequestBody maxBound >>= writeLBS >>
     writeBS "\nThis is a test. No reports were recorded."
 
-accountHandler :: AcidState AccountList -> Snap ()
+accountHandler :: AcidState TrackerDB -> Snap ()
 accountHandler astate = 
     getParam "username" >>= \username ->
     Trav.mapM (liftIO . findAccount astate . decodeUtf8) username >>=

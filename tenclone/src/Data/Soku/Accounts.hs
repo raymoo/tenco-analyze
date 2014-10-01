@@ -24,11 +24,9 @@ module Data.Soku.Accounts(
                          , accPass
                          , accMail
                          , AccountList(..)
+                         , register
                          , emptyAccList
                          , RegError(..)
-                         , registerAccount
-                         , findAccount
-                         , playerList
                          ) where
 
 import Data.Map as Map (Map, member, insert, empty, lookup, keys)
@@ -49,7 +47,7 @@ accMail = newMail
 
 -- | List of registered accounts
 data AccountList = AccountList { accList :: Map.Map T.Text Account }
-                   deriving (Data, Typeable)
+                   deriving (Eq, Ord, Show, Data, Typeable)
 
 $(deriveSafeCopy 0 'base  ''AccountList)
 
