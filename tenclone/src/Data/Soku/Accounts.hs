@@ -27,6 +27,8 @@ module Data.Soku.Accounts(
                          , register
                          , emptyAccList
                          , RegError(..)
+                         , LoginError(..)
+                         , tryLogin
                          ) where
 
 import Data.Map as Map (Map, member, insert, empty, lookup, keys)
@@ -38,6 +40,8 @@ import Control.Applicative ((<$>), (<*>), pure)
 import Data.Data
 import Data.Acid (AcidState, Query, Update, makeAcidic, query, update)
 import Data.SafeCopy 
+import Crypto.Hash
+import Data.ByteString.Char8 as BS (pack)
 
 -- | Represents someone's account information
 type Account = NewAccountReq
@@ -71,3 +75,21 @@ register (AccountList as) a
 -- | The starting list
 emptyAccList :: AccountList
 emptyAccList = AccountList Map.empty
+
+data LoginError = NonexistentAccount
+                | WrongPassword
+                  deriving (Show, Data, Typeable)
+
+$(deriveSafeCopy 0 'base ''LoginError)
+
+tryLogin :: AccountList ->
+            T.Text      -> -- ^ Username
+            T.Text      -> -- ^ Password
+            Maybe LoginError
+tryLogin (AccountList as) n p =
+    case Map.lookup n as of
+      Nothing  -> Just NonexistentAccount
+      Just acc -> if T.unpack p == makePasswordHash (BS.pack . T.unpack $ accPass acc)
+                  then Nothing
+                  else Just (WrongPassword)
+  where makePasswordHash bs = show $ (hash bs :: Digest SHA1)
