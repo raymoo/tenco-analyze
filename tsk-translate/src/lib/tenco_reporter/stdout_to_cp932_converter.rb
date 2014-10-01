@@ -7,7 +7,7 @@ if !defined?($stdout._write)
   class << $stdout
     alias :_write :write
     def write(str)
-      _write NKF.nkf('-sxm0 --cp932', str.to_s)
+      _write NKF.nkf('-sxm0 --utf8', str.to_s)
     end
   end
 end
