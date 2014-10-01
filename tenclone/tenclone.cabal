@@ -30,7 +30,7 @@ Executable tenclone
     transformers              >= 0.3   && < 0.4,
     blaze-html                >= 0.7   && < 0.8,
     blaze-markup              >= 0.6   && < 0.7,
-    time                      >= 1.4   && < 1.5
+    time                      >= 1.4   && < 1.5,
     ixset                     >= 1.0   && < 1.1
 
   if impl(ghc >= 6.12.0)
