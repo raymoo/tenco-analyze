@@ -28,7 +28,9 @@ import Text.Blaze.Internal (textValue)
 import qualified Text.Blaze.Html5 as H
 import qualified Text.Blaze.Html5.Attributes as A
 import Data.Text (Text)
-import Data.Text as T (append)
+import Data.Text as T (append, pack)
+import Data.Soku.Match
+import Data.Time.ISO8601
 
 -- | Fix to Text
 wombo :: Text -> Text
@@ -76,3 +78,36 @@ type Username = Text
 profileLink :: Username -> GameID -> Html
 profileLink pName gid = a ! href (textValue profAddress) $ toHtml gid
   where profAddress = "game/" `T.append` gid `T.append` "/account/" `T.append` pName
+
+playerPage :: GameID -> Username -> [Match] -> Html
+playerPage gid uname ms = 
+    docTypeHtml $ do
+      H.head $ do
+        H.title $ toHtml $ uname `append` "'s profile"
+      body $ do
+        h1 $ toHtml $ uname `append` "'s stats"
+        br
+        br
+        table $ mapM_ gameRow ms
+    where gameRow (Match t 
+                         g
+                         pName
+                         _
+                         oName
+                         matched
+                         won
+                         pChar
+                         oChar
+                         score) =
+              tr $ do
+                td $ toHtml $ formatISO8601 t
+                td $ maybeBold won $ toHtml pName
+                td $ toHtml $ wombo $ scoreText score
+                td $ maybeBold (not won) $ toHtml oName
+          scoreText (score1, score2) = (T.pack . show) score1 `T.append`
+                                       " - " `T.append`
+                                       (T.pack . show) score2
+
+maybeBold :: Bool -> Html -> Html
+maybeBold True h  = b h
+maybeBold False h = h
