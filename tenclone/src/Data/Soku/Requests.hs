@@ -49,7 +49,7 @@ instance Ord NewAccountReq where
 
 data MatchResult = MatchResult
     { mrTimestamp :: ISOTime   -- ^ Timestamp of the match, from tsk
-    , mrGame      :: Int       -- ^ Game id field
+    , mrGame      :: Text      -- ^ Game id field
     , mrP1Name    :: Text      -- ^ Name of player 1
     , mrP1Char    :: Character -- ^ Which character player 1 used
     , mrP1Score   :: Int       -- ^ How many rounds player 1 won
