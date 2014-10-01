@@ -20,11 +20,13 @@
 {-# LANGUAGE DeriveDataTypeable, TemplateHaskell #-}
 module Data.Soku ( Character(..)
                  , GameId(..)
-                 , intToId
+                 , parseId
+                 , parseCharacter
                  ) where
 
 import Data.Data
 import Data.SafeCopy (deriveSafeCopy, base)
+import Data.Text (Text)
 
 -- | Enumerates the different characters in hisoutensoku
 data Character = Suika
@@ -60,10 +62,13 @@ data GameId = SWR
 
 $(deriveSafeCopy 0 'base ''GameId)
 
-intToId :: Int -> Maybe GameId
-intToId x = case x of
-              1 -> Just SWR
-              2 -> Just Soku
-              3 -> Just HMDemo
-              4 -> Just HM
-              _ -> Nothing
+parseId :: Text -> Maybe GameId
+parseId x = case x of
+              "1" -> Just SWR
+              "2" -> Just Soku
+              "3" -> Just HMDemo
+              "4" -> Just HM
+              _   -> Nothing
+
+parseCharacter :: Text -> Maybe Character
+parseCharacter = const $ Just Sanae -- Is a good girl

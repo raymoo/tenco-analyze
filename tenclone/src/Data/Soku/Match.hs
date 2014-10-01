@@ -58,7 +58,7 @@ requestToMatch user (MatchResult timestamp
                                  p2Char
                                  p2Score) = madeMatch <$> 
                                             parseISO8601 timestamp <*>
-                                            intToId game
+                                            parseId game
     where madeMatch t g =  Match { mTime         = t
                                  , mGame         = g
                                  , mPlayerName   = user
