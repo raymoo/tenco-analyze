@@ -8,6 +8,8 @@ module Data.Tracker (
                     , playerList
                     , insertMatch
                     , playerMatches
+                    , tryToLogin
+                    , entireSetGet
                     ) where
 
 import Data.Soku.Accounts
@@ -50,6 +52,10 @@ regUpdate acc = register . accountDB <$> get <*> pure acc >>= \result ->
                        result
     where putList list tDB = tDB { accountDB = list }
 
+-- | Attempts a login. Returns 'Just error' if there was a problem.
+attemptLogin :: Text -> Text -> Query TrackerDB (Maybe LoginError)
+attemptLogin n p = tryLogin . accountDB <$> ask <*> pure n <*> pure p
+
 -- | Return a list of players
 listOfPlayers :: Query TrackerDB ([Text])
 listOfPlayers = getKeys . accountDB <$> ask
@@ -65,7 +71,10 @@ addMatch m = modify $ modifyMatch (I.insert m)
 playersMatches :: Text -> Query (TrackerDB) ([Match])
 playersMatches name = I.toList . getEQ (PlayerName name) . matchDB <$> ask
 
-$(makeAcidic ''TrackerDB ['regUpdate, 'queryAccount, 'listOfPlayers, 'addMatch, 'playersMatches])
+entireSet :: Query (TrackerDB) (IxSet Match)
+entireSet = matchDB <$> ask
+
+$(makeAcidic ''TrackerDB ['regUpdate, 'queryAccount, 'listOfPlayers, 'attemptLogin, 'addMatch, 'playersMatches, 'entireSet])
 
 registerAccount :: AcidState TrackerDB -> Account -> IO (Maybe RegError)
 registerAccount astate acc = A.update astate (RegUpdate acc)
@@ -76,8 +85,14 @@ findAccount astate name = query astate (QueryAccount name)
 playerList :: AcidState TrackerDB -> IO ([Text])
 playerList astate = query astate ListOfPlayers
 
+tryToLogin :: AcidState TrackerDB -> Text -> Text -> IO (Maybe LoginError)
+tryToLogin astate n p = query astate (AttemptLogin n p)
+
 insertMatch :: AcidState TrackerDB -> Match -> IO ()
 insertMatch astate = A.update astate . AddMatch
 
 playerMatches :: AcidState TrackerDB -> Text -> IO [Match]
 playerMatches astate = query astate . PlayersMatches
+
+entireSetGet :: AcidState TrackerDB -> IO (IxSet Match)
+entireSetGet astate = query astate EntireSet
