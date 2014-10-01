@@ -91,5 +91,5 @@ tryLogin (AccountList as) n p =
       Nothing  -> Just NonexistentAccount
       Just acc -> if T.unpack p == makePasswordHash (BS.pack . T.unpack $ accPass acc)
                   then Nothing
-                  else Just (WrongPassword)
-  where makePasswordHash bs = show $ (hash bs :: Digest SHA1)
+                  else Just WrongPassword
+  where makePasswordHash bs = show (hash bs :: Digest SHA1)

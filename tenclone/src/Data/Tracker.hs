@@ -48,7 +48,7 @@ queryAccount name = Map.lookup name . accList . accountDB <$> ask
 regUpdate :: Account -> Update TrackerDB (Maybe RegError)
 regUpdate acc = register . accountDB <$> get <*> pure acc >>= \result ->
                 either (return . Just) 
-                       (\list -> (modify $ putList list) >> return Nothing)
+                       (\list -> modify (putList list) >> return Nothing)
                        result
     where putList list tDB = tDB { accountDB = list }
 
@@ -57,21 +57,21 @@ attemptLogin :: Text -> Text -> Query TrackerDB (Maybe LoginError)
 attemptLogin n p = tryLogin . accountDB <$> ask <*> pure n <*> pure p
 
 -- | Return a list of players
-listOfPlayers :: Query TrackerDB ([Text])
+listOfPlayers :: Query TrackerDB [Text]
 listOfPlayers = getKeys . accountDB <$> ask
     where getKeys (AccountList as) = Map.keys as
 
 -- | Inserts a match into the database
-addMatch :: Match -> Update (TrackerDB) ()
+addMatch :: Match -> Update TrackerDB ()
 addMatch m = modify $ modifyMatch (I.insert m)
     where modifyMatch f tracker =
               tracker { matchDB = f $ matchDB tracker }
 
 -- | Gets the matches a player reported.
-playersMatches :: Text -> Query (TrackerDB) ([Match])
+playersMatches :: Text -> Query TrackerDB [Match]
 playersMatches name = I.toList . getEQ (PlayerName name) . matchDB <$> ask
 
-entireSet :: Query (TrackerDB) (IxSet Match)
+entireSet :: Query TrackerDB (IxSet Match)
 entireSet = matchDB <$> ask
 
 $(makeAcidic ''TrackerDB ['regUpdate, 'queryAccount, 'listOfPlayers, 'attemptLogin, 'addMatch, 'playersMatches, 'entireSet])
@@ -82,7 +82,7 @@ registerAccount astate acc = A.update astate (RegUpdate acc)
 findAccount :: AcidState TrackerDB -> Text -> IO (Maybe Account)
 findAccount astate name = query astate (QueryAccount name)
 
-playerList :: AcidState TrackerDB -> IO ([Text])
+playerList :: AcidState TrackerDB -> IO [Text]
 playerList astate = query astate ListOfPlayers
 
 tryToLogin :: AcidState TrackerDB -> Text -> Text -> IO (Maybe LoginError)

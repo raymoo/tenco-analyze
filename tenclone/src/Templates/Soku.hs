@@ -41,7 +41,7 @@ wombo = Prelude.id
 indexPage :: [Text] -> Html
 indexPage ps = 
     docTypeHtml $ do
-      H.head $ do
+      H.head $
         H.title "Welcome to Tenclone!"
       body $ do
         toHtml $ wombo "Welcome to Tenclone!"
@@ -83,7 +83,7 @@ profileLink pName gid = a ! href (textValue profAddress) $ toHtml gid
 playerPage :: GameID -> Username -> [Match] -> Html
 playerPage gid uname ms = 
     docTypeHtml $ do
-      H.head $ do
+      H.head $
         H.title $ toHtml $ uname `append` "'s profile"
       body $ do
         h1 $ toHtml $ uname `append` "'s stats"

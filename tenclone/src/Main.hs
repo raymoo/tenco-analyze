@@ -20,7 +20,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Main where
 
-import           Data.Maybe (catMaybes)
+import           Data.Maybe (mapMaybe)
 import           Control.Applicative
 import           Snap.Core
 import           Snap.Util.FileServe
@@ -64,7 +64,7 @@ indexHandler astate =
 newAccountHandler :: AcidState TrackerDB -> Snap ()
 newAccountHandler astate = 
     parseNewAccount <$> readRequestBody maxBound >>= 
-    maybe ((modifyResponse $ setResponseStatus 400 "Bad input") >> 
+    maybe (modifyResponse (setResponseStatus 400 "Bad input") >> 
            writeBS "400: Bad input")
           tryToRegister
         where tryToRegister accReq =
@@ -90,20 +90,20 @@ matchRecordHandler astate =
                      Nothing  -> liftIO $ makeList mLog
   where loginAttempt mLog' = liftIO $ tryToLogin astate (rlName mLog') (rlPass mLog')
         makeList (ReportLog n _ gid mrs _) =
-            mapM_ (insertMatch astate) . catMaybes . map (requestToMatch n) $ mrs
+            mapM_ (insertMatch astate) . mapMaybe (requestToMatch n) $ mrs
 
 accountHandler :: AcidState TrackerDB -> Snap ()
 accountHandler astate = do
   username <- getParam "username"
   gameId <- getParam "id"
   case (,) <$> username <*> gameId of
-    Nothing          -> (modifyResponse (setResponseStatus 400 "No name") >>
-                         writeBS "400: No name found")
+    Nothing          -> modifyResponse (setResponseStatus 400 "No name") >>
+                        writeBS "400: No name found"
     Just (name, gId) -> do
       account <- liftIO $ findAccount astate (decodeUtf8 name)
       case account of
-        Nothing  -> (modifyResponse (setResponseStatus 404 "Account not found") >>
-                     writeBS "404: That user does not exist.")
+        Nothing  -> modifyResponse (setResponseStatus 404 "Account not found") >>
+                    writeBS "404: That user does not exist."
         Just acc -> do
                      matches <- liftIO $ playerMatches astate (accName acc)
                      writeLBS . renderHtml $ playerPage
