@@ -17,7 +17,7 @@ require './lib/tenco_reporter/stdout_to_cp932_converter'
 
 # プログラム情報
 PROGRAM_VERSION = '0.04'
-PROGRAM_NAME = '天則観報告ツール'
+PROGRAM_NAME = 'Tensokukan Reporter Tool'
 
 # 設定
 TRACKRECORD_POST_SIZE = 250   # 一度に送信する対戦結果数
@@ -26,7 +26,7 @@ ACCOUNT_NAME_REGEX = /\A[a-zA-Z0-9_]{1,32}\z/
 MAIL_ADDRESS_REGEX = /\A[\x01-\x7F]+@(([-a-z0-9]+\.)*[a-z]+|\[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\])\z/ # メールアドレスチェック用正規表現
 PLEASE_RETRY_FORCE_INSERT = "<Please Retry in Force-Insert Mode>"  # 強制インサートリトライのお願い文字列
 HTTP_REQUEST_HEADER = {"User-Agent" => "Tensokukan Report Tool #{PROGRAM_VERSION}"}
-RECORD_SW_NAME = '天則観' # 対戦記録ソフトウェア名
+RECORD_SW_NAME = 'Tensokukan' # 対戦記録ソフトウェア名
 DB_TR_TABLE_NAME = 'trackrecord123' # DBの対戦結果テーブル名
 WEB_SERVICE_NAME = 'Tenco!'  # サーバ側のサービス名
 
@@ -70,7 +70,7 @@ begin
 
   # サーバー環境設定ファイルがなければ、エラー終了
   unless File.exist?(env_file) then
-    raise "#{env_file} が見つかりません。\nダウンロードした本プログラムのフォルダからコピーしてください。"
+    raise "#{env_file} could not be found.\nPlease copy it from the folder you downloaded it with."
   end
 
   # 設定ファイル読み込み
@@ -125,12 +125,12 @@ begin
       # puts "！最新バージョンの取得に失敗しました。"
       # puts "スキップして続行します。"
     when latest_version > PROGRAM_VERSION then
-      puts "★新しいバージョンの#{PROGRAM_NAME}が公開されています。（ver.#{latest_version}）"
-      puts "ブラウザを開いて確認しますか？（Nを入力するとスキップ）"
+      puts "★A new version of #{PROGRAM_NAME} is available.（ver.#{latest_version}）"
+      puts "Would you like to see it in your browser? (Press N to skip)"
       print "> "
       case gets[0..0]
       when "N" then
-        puts "スキップして続行します。"
+        puts "Skipping."
         puts 
       else
         system "start #{CLIENT_SITE_URL}"
@@ -142,12 +142,12 @@ begin
     end
     
   rescue => ex
-    puts "！クライアント最新バージョン自動チェック中にエラーが発生しました。"
+    puts "The client's newest version check has resulted in an error."
     puts ex.to_s
     # puts ex.backtrace.join("\n")
     puts ex.class
     puts
-    puts "スキップして処理を続行します。"
+    puts "Skipping."
     puts
   end
     
@@ -163,23 +163,23 @@ begin
     begin
       game_id = config['game']['id'].to_i
     rescue => ex
-      raise "エラー：設定ファイル（#{config_file}）から、ゲームIDを取得できませんでした。"
+      raise "Error: The game ID could not be found from the setting file (#{config_file})."
     end
     
     if game_id.nil? || game_id < 1 then
-      raise "エラー：設定ファイル（#{config_file}）のゲームIDの記述が正しくありません。"
+      raise "Error: The game id recorded in the setting file (#{config_file}) is malformed."
     end
     
-    puts "★設定ファイルのゲームID（#{game_id}）で報告を実行します"  
+    puts "★Reporting with the config file's game id (#{game_id})"
   end
 
   # 設定ファイルのデータベースファイルパスをデフォルトに戻す
   opt.on('--database-filepath-default-overwrite') do |v|  
-    puts "★設定ファイルの#{RECORD_SW_NAME}DBファイルパスを上書きします"  
-    puts "#{config_file} の#{RECORD_SW_NAME}DBファイルパスを #{DEFAULT_DATABASE_FILE_PATH} に書き換え..."  
+    puts "★Overwriting the configured DB path at #{RECORD_SW_NAME}"  
+    puts "Overwriting #{config_file}'s DB file path at #{RECORD_SW_NAME} with #{DEFAULT_DATABASE_FILE_PATH}"
     config['database']['file_path'] = DEFAULT_DATABASE_FILE_PATH
     save_config(config_file, config)
-    puts "設定ファイルを保存しました！"  
+    puts "Saved settings!"
     puts
     exit
   end
@@ -193,9 +193,9 @@ begin
     account_password = ''
     is_account_register_finish = false
     
-    puts "★#{WEB_SERVICE_NAME} アカウント設定（初回実行時）\n"  
-    puts "#{WEB_SERVICE_NAME} をはじめてご利用の場合、「1」をいれて Enter キーを押してください。"  
-    puts "すでに緋行跡報告ツール等でアカウント登録済みの場合、「2」をいれて Enter キーを押してください。\n"  
+    puts "★#{WEB_SERVICE_NAME} Account Setting (First Time)\n"  
+    puts "If you are using #{WEB_SERVICE_NAME} for the first time, press \"1\" and hit Enter.\n"  
+    puts "If you already have an account with one of the reporters, hit \"2\" and hit Enter.\n"  
     puts
     print "> "
     
@@ -211,22 +211,23 @@ begin
         break
       end
       puts 
-      puts "#{WEB_SERVICE_NAME} をはじめてご利用の場合、「1」をいれて Enter キーを押してください。"  
-      puts "すでに緋行跡報告ツール等で #{WEB_SERVICE_NAME} アカウントを登録済みの場合、「2」をいれて Enter キーを押してください。\n"  
+      puts "★#{WEB_SERVICE_NAME} Account Setting (First Time)\n"  
+      puts "If you are using #{WEB_SERVICE_NAME} for the first time, press \"1\" and hit Enter.\n"  
+      puts "If you already have an account with one of the reporters, hit \"2\" and hit Enter.\n"  
       puts
       print "> "
     end
     
     if is_new_account then
       
-      puts "★新規 #{WEB_SERVICE_NAME} アカウント登録\n\n"  
+      puts "★New #{WEB_SERVICE_NAME} account registration\n\n"  
       
       while (!is_account_register_finish)
         # アカウント名入力
-        puts "希望アカウント名を入力してください\n"  
-        puts "アカウント名はURLの一部として使用されます。\n"  
-        puts "（半角英数とアンダースコア_のみ使用可能。32文字以内）\n"  
-        print "希望アカウント名> "  
+        puts "Enter your desired username.\n"  
+        puts "Your username will become part of your profile URL.\n"  
+        puts "(Halfwidth alphanumeric characters and underscores only. Max 32 characters)\n"
+        print "Username> "  
         while (input = gets)
           input.strip!
           if input =~ ACCOUNT_NAME_REGEX then
@@ -234,47 +235,47 @@ begin
             puts 
             break
           else
-            puts "！希望アカウント名は半角英数とアンダースコア_のみで、32文字以内で入力してください"  
-            print "希望アカウント名> "  
+            puts "！Please only use half-width alphanumeric characters or underscores, and keep it under 32 characters.\n"
+            print "Username> "  
           end
         end
         
         # パスワード入力
-        puts "パスワードを入力してください（使用文字制限なし。4～16byte以内。アカウント名と同一禁止。）\n"  
-        print "パスワード> "  
+        puts "Enter a password (No restrictions on characters. Must be within 4 and 16 bytes. Cannot be the same as your username.\n"
+        print "Password> "  
         while (input = gets)
           input.strip!
           if (input.length >= 4 and input.length <= 16 and input != account_name) then
             account_password = input
             break
           else
-            puts "！パスワードは4～16byte以内で、アカウント名と別の文字列を入力してください"  
-            print "パスワード> "  
+            puts "！Please keep your password between 4 and 16 bytes, and do not use your username."
+            print "Password> "  
           end
         end 
         
-        print "パスワード（確認）> "  
+        print "Password (Confirm)> "  
         while (input = gets)
           input.strip!
           if (account_password == input) then
             puts 
             break
           else
-            puts "！パスワードが一致しません\n"  
-            print "パスワード（確認）> "  
+            puts "！The passwords do not match.\n"  
+            print "Passoword (Confirm)> "  
           end
         end
         
         # メールアドレス入力
-        puts "メールアドレスを入力してください（入力は任意）\n"  
-        puts "※パスワードを忘れたときの連絡用にのみ使用します。\n"  
-        puts "※記入しない場合、パスワードの連絡はできません。\n"  
-        print "メールアドレス> "  
+        puts "Enter your email address (Optional)\n"  
+        puts "※This will be used to contact you if you forget your password.\n"  
+        puts "※If you do not enter anything, we will not be able to send you your password.\n"  
+        print "Email> "
         while (input = gets)
           input.strip!
           if (input == '') then
             account_mail_address = ''
-            puts "メールアドレスは登録しません。"  
+            puts "Not registering email address."  
             puts
             break
           elsif input =~ MAIL_ADDRESS_REGEX and input.length <= 256 then
@@ -282,13 +283,13 @@ begin
             puts
             break
           else
-            puts "！メールアドレスは正しい形式で、256byte以内にて入力してください"  
-            print "メールアドレス> "  
+            puts "！Please format your address correctly and keep it within 256 bytes."
+            print "Email> "
           end
         end
         
         # 新規アカウントをサーバーに登録
-        puts "サーバーにアカウントを登録しています...\n"  
+        puts "Registering your account with the server...\n"
         
         # アカウント XML 生成
         account_xml = REXML::Document.new
@@ -307,7 +308,7 @@ begin
           response = s.post(SERVER_ACCOUNT_PATH, account_xml.to_s, HTTP_REQUEST_HEADER)
         end
         
-        print "サーバーからのお返事\n"  
+        print "Server Response:\n"  
         response.body.each_line do |line|
           puts "> #{line}"
         end
@@ -321,31 +322,31 @@ begin
           save_config(config_file, config)
           
           puts 
-          puts "アカウント情報を設定ファイルに保存しました。"
-          puts "サーバーからのお返事の内容をご確認ください。"
+          puts "Saved account info to config file."
+          puts "Please check the server response."
           puts
-          puts "Enter キーを押すと、続いて対戦結果の報告をします..."
+          puts "Press Enter to continue with reporting your match log."
           gets
           
-          puts "引き続き、対戦結果の報告をします..."
+          puts "Reporting log..."
           puts
         else
         # アカウント登録失敗時
-          puts "もう一度アカウント登録をやり直します...\n\n"
+          puts "Retrying account registration...\n\n"
           sleep 1
         end
         
       end # while (!is_account_register_finish)
     else
 
-      puts "★設定ファイル編集\n"
-      puts "#{WEB_SERVICE_NAME} アカウント名とパスワードを設定します"
-      puts "※アカウント名とパスワードが分からない場合、ご利用の#{WEB_SERVICE_NAME}クライアント（緋行跡報告ツール等）の#{config_file}で確認できます"
+      puts "★Editing configuration file\n"
+      puts "Set your #{WEB_SERVICE_NAME} username and password."
+      puts "※If you do not know your username or password, you can check it in a previously-used #{WEB_SERVICE_NAME} client's (e.g. Hikouseki Reporter Tool) #{config_file}"
       puts 
-      puts "お持ちの #{WEB_SERVICE_NAME} アカウント名を入力してください"
+      puts "Input your #{WEB_SERVICE_NAME} username."
       
       # アカウント名入力
-      print "アカウント名> "
+      print "Username> "
       while (input = gets)
         input.strip!
         if input =~ ACCOUNT_NAME_REGEX then
@@ -353,14 +354,14 @@ begin
           puts 
           break
         else
-          puts "！アカウント名は半角英数とアンダースコア_のみで、32文字以内で入力してください"
+          puts "！Please only use half-width alphanumeric characters or underscores, and keep it under 32 characters."
         end
-        print "アカウント名> "
+        print "Username> "
       end
       
       # パスワード入力
-      puts "パスワードを入力してください\n"
-      print "パスワード> "
+      puts "Enter your password.\n"
+      print "Password> "
       while (input = gets)
         input.strip!
         if (input.length >= 4 and input.length <= 16 and input != account_name) then
@@ -368,9 +369,9 @@ begin
           puts
           break
         else
-          puts "！パスワードは4～16byte以内で、アカウント名と別の文字列を入力してください"
+          puts "！Please enter a password between 4 and 16 bytes different from your username."
         end
-        print "パスワード> "
+        print "Password> "
       end
       
       # 設定ファイル保存
@@ -378,8 +379,8 @@ begin
       config['account']['password'] = account_password
       save_config(config_file, config)
       
-      puts "アカウント情報を設定ファイルに保存しました。\n\n"
-      puts "引き続き、対戦結果の報告をします...\n\n"
+      puts "Saved account info to config file.\n\n"
+      puts "Reporting log...\n\n"
       
     end # if is_new_account
     
@@ -390,7 +391,7 @@ begin
     
   ## 登録済みの最終対戦結果時刻を取得する
   unless is_all_report then
-    puts "★登録済みの最終対戦時刻を取得"
+    puts "★Retrieving the time of your last reported match..."
     puts "GET http://#{SERVER_LAST_TRACK_RECORD_HOST}#{SERVER_LAST_TRACK_RECORD_PATH}?game_id=#{game_id}&account_name=#{account_name}"
 
     http = Net::HTTP.new(SERVER_LAST_TRACK_RECORD_HOST, 80)
@@ -402,23 +403,23 @@ begin
     if response.code == '200' or response.code == '204' then
       if (response.body and response.body != '') then
         last_report_time = Time.parse(response.body)
-        puts "サーバー登録済みの最終対戦時刻：#{last_report_time.strftime('%Y/%m/%d %H:%M:%S')}"
+        puts "Time of last match reported: #{last_report_time.strftime('%Y/%m/%d %H:%M:%S')}"
       else
         last_report_time = Time.at(0)
-        puts "サーバーには対戦結果未登録です"
+        puts "No matches recorded on server."
       end
     else
-      raise "最終対戦時刻の取得時にサーバーエラーが発生しました。処理を中断します。"
+      raise "An error occured while getting the time of your last reported match. Halting."
     end
   else
-    puts "★全件報告モードです。サーバーからの登録済み最終対戦時刻の取得をスキップします。"
+    puts "★You are set to report all matches. Skipping retrieval of last report time."
     last_report_time = Time.at(0)
   end
   puts
 
   ## 対戦結果報告処理
-  puts "★対戦結果送信"
-  puts ("#{RECORD_SW_NAME}の記録から、" + last_report_time.strftime('%Y/%m/%d %H:%M:%S') + " 以降の対戦結果を報告します。")
+  puts "★Transmitting Match Log"
+  puts "Reporting matches since " + last_report_time.strftime('%Y/%m/%d %H:%M:%S') + " from #{RECORD_SW_NAME}"
   puts
 
   # DBから対戦結果を取得
@@ -429,10 +430,10 @@ begin
     is_warning_exist = true if is_read_trackrecord_warning
   else
     raise <<-MSG
-#{config_file} に設定された#{RECORD_SW_NAME}データベースファイルが見つかりません。
-・#{PROGRAM_NAME}のインストール場所が正しいかどうか、確認してください
-　デフォルト設定の場合、#{RECORD_SW_NAME}フォルダに、#{PROGRAM_NAME}をフォルダごとおいてください。
-・#{config_file} を変更した場合、設定が正しいかどうか、確認してください
+  The #{RECORD_SW_NAME} database file set in #{config_file} was not found
+・Please check if #{PROGRAM_NAME} is installed correctly.
+  If you are using the default settings, put the #{PROGRAM_NAME} folder in the #{RECORD_SW_NAME} folder.
+・If you have modified #{config_file}, check if the settings are correct.
     MSG
   end
 
@@ -442,7 +443,7 @@ begin
 
   # 報告対象データが0件なら送信しない
   if trackrecord.length == 0 then
-    puts "報告対象データはありませんでした。"
+    puts "No data to report."
   else
     
     # 対戦結果データを分割して送信
@@ -450,7 +451,7 @@ begin
       end_row_num = [start_row_num + TRACKRECORD_POST_SIZE - 1, trackrecord.length - 1].min
       response = nil # サーバーからのレスポンスデータ
       
-      puts "#{trackrecord.length}件中の#{start_row_num + 1}件目～#{end_row_num + 1}件目を送信しています#{is_force_insert ? "（強制インサートモード）" : ""}...\n"
+      puts "Out of #{trackrecord.length}items, reporting items #{start_row_num + 1}～#{end_row_num + 1} #{is_force_insert ? "(Force Insert Mode" : ""}...\n"
       
       # 送信用XML生成
       trackrecord_xml_string = trackrecord2xml_string(game_id, account_name, account_password, trackrecord[start_row_num..end_row_num], is_force_insert)
@@ -472,7 +473,7 @@ begin
       end
       
       # 送信結果表示
-      puts "サーバーからのお返事"
+      puts "Server response:"
       response.body.each_line do |line|
         puts "> #{line}"
       end
@@ -483,12 +484,12 @@ begin
         # 特に表示しない
       else
         if response.body.index(PLEASE_RETRY_FORCE_INSERT)
-          puts "強制インサートモードで報告しなおします。5秒後に報告再開...\n\n"
+          puts "Retrying report with force-insert mode. Reporting in 5 seconds...\n\n"
           sleep 5
           is_force_insert = true
           redo
         else
-          raise "報告時にサーバー側でエラーが発生しました。処理を中断します。"
+          raise "A server error occured during the report. Halting..."
         end
       end
     end
@@ -501,14 +502,14 @@ begin
 
   # 終了メッセージ出力
   if is_warning_exist then
-    puts "報告処理は正常に終了しましたが、警告メッセージがあります。"
-    puts "出力結果をご確認ください。"
+    puts "The reporting completed successfully, but the server sent a notice."
+    puts "Please check the output."
     puts
-    puts "Enter キーを押すと、処理を終了します。"
+    puts "Press Enter to finish."
     exit if gets
     puts
   else
-    puts "報告処理が正常に終了しました。"
+    puts "Reporting executed successfully."
   end
 
   sleep 3
@@ -521,30 +522,30 @@ rescue => ex
   end
   
   puts 
-  puts "処理中にエラーが発生しました。処理を中断します。\n"
+  puts "An error occured during execution. Halting.\n"
   puts 
-  puts '### エラー詳細ここから ###'
+  puts '### Error details ###'
   puts
   puts ex.to_s
   puts
   puts ex.backtrace.join("\n")
-  puts (config ? config.to_yaml : "config が設定されていません。")
+  puts (config ? config.to_yaml : "Your config isn't set.")
   if response then
     puts
-    puts "<サーバーからの最後のメッセージ>"
+    puts "<Last message from the server>"
     puts "HTTP status code : #{response.code}"
     puts response.body
   end
   puts
-  puts '### エラー詳細ここまで ###'
+  puts '### End Error Details ###'
   
   File.open(ERROR_LOG_PATH, 'a') do |log|
     log.puts "#{Time.now.strftime('%Y/%m/%d %H:%M:%S')} #{File::basename(__FILE__)} #{PROGRAM_VERSION}" 
     log.puts ex.to_s
     log.puts ex.backtrace.join("\n")
-    log.puts config ? config.to_yaml : "config が設定されていません。"
+    log.puts config ? config.to_yaml : "No config set."
     if response then
-      log.puts "<サーバーからの最後のメッセージ>"
+      log.puts "<Last message from server>"
       log.puts "HTTP status code : #{response.code}"
       log.puts response.body
     end
@@ -552,9 +553,9 @@ rescue => ex
   end
   
   puts
-  puts "上記のエラー内容を #{ERROR_LOG_PATH} に書き出しました。"
+  puts "The above error has been recorded in #{ERROR_LOG_PATH}"
   puts
   
-  puts "Enter キーを押すと、処理を終了します。"
+  puts "Press Enter to finish"
   exit if gets
 end
