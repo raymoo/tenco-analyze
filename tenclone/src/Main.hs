@@ -20,7 +20,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Main where
 
-import           Data.Maybe (mapMaybe)
+import           Data.Maybe (mapMaybe, listToMaybe)
 import           Control.Applicative
 import           Snap.Core
 import           Snap.Util.FileServe
@@ -38,7 +38,12 @@ import           Data.Text.Encoding (decodeUtf8)
 import           Control.Monad (join)
 import           Templates.Soku
 import           Text.Blaze.Html.Renderer.Utf8 (renderHtml)
-
+import           Data.IxSet as I
+import           Data.Soku.Match
+import           Data.List as L
+import           Data.Time.ISO8601
+import           Data.Time
+import           Data.Soku
 
 main :: IO ()
 main = openLocalState emptyDB >>=
@@ -47,7 +52,7 @@ main = openLocalState emptyDB >>=
 site :: AcidState TrackerDB -> Snap ()
 site astate =
     ifTop (indexHandler astate) <|>
-    route [ ("api/last_track_record", writeBS "2010-09-27T22:52:00+00:00")
+    route [ ("api/last_track_record", lastRecordHandler astate)
           , ("api/account", newAccountHandler astate)
           , ("api/track_record", matchRecordHandler astate)
           , ("search", accountHandler astate)
@@ -60,6 +65,24 @@ indexHandler :: AcidState TrackerDB -> Snap ()
 indexHandler astate = 
     indexPage <$> liftIO (playerList astate) >>=
     writeLBS . renderHtml
+
+lastRecordHandler :: AcidState TrackerDB -> Snap ()
+lastRecordHandler astate = do
+  maybeId <- getParam "game_id"
+  maybeName <- getParam "account_name"
+  case (,) <$> (decodeUtf8 <$> maybeId >>= parseId) <*> maybeName of
+    Nothing           -> modifyResponse (setResponseStatus 400 "Bad parameters") >>
+                         writeBS "400: Bad parameters"
+    Just (gid, pName) -> do
+      entireSet <- liftIO $ entireSetGet astate
+      case mTime <$> lastTime entireSet of
+        Nothing -> modifyResponse (setResponseStatus 204 "No record")
+        Just t  -> writeBS . pack . formatISO8601 $ t
+      where lastTime =
+                listToMaybe .
+                I.toDescList (I.Proxy :: I.Proxy UTCTime) .
+                I.getEQ (gid) .
+                I.getEQ (PlayerName $ decodeUtf8 pName)
 
 newAccountHandler :: AcidState TrackerDB -> Snap ()
 newAccountHandler astate = 
