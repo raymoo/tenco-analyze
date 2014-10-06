@@ -75,4 +75,10 @@ parseId x = case x of
               _   -> Nothing
 
 parseCharacter :: Text -> Maybe Character
-parseCharacter = const $ Just Sanae -- Is a good girl
+parseCharacter t = case t of
+                     "7"  -> Just Yuyuko
+                     "8"  -> Just Yukari
+                     "9"  -> Just Suika
+                     "14" -> Just Tenshi
+                     _    -> Just Sanae -- is a good girl (replace with Nothing when
+                                        -- character ids are filled out completely
