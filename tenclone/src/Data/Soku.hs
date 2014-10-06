@@ -22,11 +22,12 @@ module Data.Soku ( Character(..)
                  , GameId(..)
                  , parseId
                  , parseCharacter
+                 , showText
                  ) where
 
 import Data.Data
 import Data.SafeCopy (deriveSafeCopy, base)
-import Data.Text (Text)
+import Data.Text (Text, pack)
 
 -- | Enumerates the different characters in hisoutensoku
 data Character = Suika
@@ -52,6 +53,9 @@ data Character = Suika
                  deriving (Eq, Ord, Show, Data, Typeable)
 
 $(deriveSafeCopy 0 'base ''Character)
+
+showText :: Show a => a -> Text
+showText = pack . show
 
 -- | Enumerates the different possible games
 data GameId = SWR
