@@ -44,6 +44,7 @@ import           Data.List as L
 import           Data.Time.ISO8601
 import           Data.Time
 import           Data.Soku
+import           Data.ByteString (ByteString)
 
 main :: IO ()
 main = openLocalState emptyDB >>=
@@ -71,12 +72,12 @@ lastRecordHandler astate = do
   maybeId <- getParam "game_id"
   maybeName <- getParam "account_name"
   case (,) <$> (decodeUtf8 <$> maybeId >>= parseId) <*> maybeName of
-    Nothing           -> modifyResponse (setResponseStatus 400 "Bad parameters") >>
+    Nothing           -> codeReason 400 "Bad parameters" >>
                          writeBS "400: Bad parameters"
     Just (gid, pName) -> do
       entireSet <- liftIO $ entireSetGet astate
       case mTime <$> lastTime entireSet of
-        Nothing -> modifyResponse (setResponseStatus 204 "No record")
+        Nothing -> codeReason 204 "No record"
         Just t  -> writeBS . pack . formatISO8601 $ t
       where lastTime =
                 listToMaybe .
@@ -87,14 +88,14 @@ lastRecordHandler astate = do
 newAccountHandler :: AcidState TrackerDB -> Snap ()
 newAccountHandler astate = 
     parseNewAccount <$> readRequestBody maxBound >>= 
-    maybe (modifyResponse (setResponseStatus 400 "Bad input") >> 
+    maybe (codeReason 400 "Bad input" >> 
            writeBS "400: Bad input")
           tryToRegister
         where tryToRegister accReq =
                   liftIO (registerAccount astate accReq) >>=
                   maybe (writeBS "Success") 
                         (\err ->
-                         modifyResponse (setResponseStatus 400 "Registration Failed") >>
+                         codeReason 400 "Registration Failed" >>
                          writeBS "400: Registration failed: " >>
                          (writeBS . pack) (show err))
                                      
@@ -103,11 +104,11 @@ matchRecordHandler :: AcidState TrackerDB -> Snap ()
 matchRecordHandler astate =
     parseReportLog <$> readRequestBody maxBound >>= \maybeLog ->
     case maybeLog of
-      Nothing   -> modifyResponse (setResponseStatus 400 "Bad Time") >>
+      Nothing   -> codeReason 400 "Bad Time" >>
                    writeBS "400: Bad Time"
       Just mLog -> loginAttempt mLog >>= \attempt ->
                    case attempt of
-                     Just err -> modifyResponse (setResponseStatus 400 "Login Failure") >>
+                     Just err -> codeReason 400 "Login Failure" >>
                                  writeBS "400: Login failed: " >>
                                  (writeBS . pack $ show err)
                      Nothing  -> liftIO $ makeList mLog
@@ -120,12 +121,12 @@ accountHandler astate = do
   username <- getParam "username"
   gameId <- getParam "id"
   case (,) <$> username <*> gameId of
-    Nothing          -> modifyResponse (setResponseStatus 400 "No name") >>
+    Nothing          -> codeReason 400 "No name" >>
                         writeBS "400: No name found"
     Just (name, gId) -> do
       account <- liftIO $ findAccount astate (decodeUtf8 name)
       case account of
-        Nothing  -> modifyResponse (setResponseStatus 404 "Account not found") >>
+        Nothing  -> codeReason 404 "Account not found" >>
                     writeBS "404: That user does not exist."
         Just acc -> do
                      matches <- liftIO $ playerMatches astate (accName acc)
@@ -133,3 +134,6 @@ accountHandler astate = do
                                              (decodeUtf8 gId)
                                              (decodeUtf8 name)
                                              matches
+
+codeReason :: Int -> ByteString -> Snap ()
+codeReason code mess = modifyResponse (setResponseStatus code mess)
