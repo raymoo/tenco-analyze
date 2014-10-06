@@ -83,13 +83,22 @@ newtype PlayerHandle = PlayerHandle Text
 newtype OpponentName = OpponentName Text
     deriving (Eq, Ord, Show, Data, Typeable, SafeCopy)
 
+newtype PChar = PChar Character
+    deriving (Eq, Ord, Show, Data, Typeable, SafeCopy)
+
+newtype OChar = OChar Character
+    deriving (Eq, Ord, Show, Data, Typeable, SafeCopy)
+
 instance Indexable Match where
     empty = ixSet [ ixFun $ \m -> [mTime m] 
                   , ixFun $ \m -> [mGame m]
                   , ixFun $ \m -> [PlayerName $ mPlayerName m]
                   , ixFun $ \m -> [PlayerHandle $ mPlayerHandle m]
                   , ixFun $ \m -> [OpponentName $ mOpponentName m]
+                  , ixFun $ \m -> [PChar $ mPlayerChar m]
+                  , ixFun $ \m -> [OChar $ mOppChar m]
                   , ixFun $ \m -> [mMatched m]
                   , ixFun $ \m -> [mPlayerChar m]
+                  , ixFun $ \m -> [mScore m]
                   ]
 
