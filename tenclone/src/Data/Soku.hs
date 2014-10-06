@@ -43,7 +43,7 @@ data Character = Suika
                | Sanae
                | Cirno
                | Meiling
-               | Utshuho
+               | Utsuho
                | Suwako
                | Reisen
                | Aya
@@ -76,9 +76,14 @@ parseId x = case x of
 
 parseCharacter :: Text -> Maybe Character
 parseCharacter t = case t of
+                     "0"  -> Just Reimu
+                     "1"  -> Just Marisa
+                     "2"  -> Just Sakuya
                      "7"  -> Just Yuyuko
                      "8"  -> Just Yukari
                      "9"  -> Just Suika
+                     "13" -> Just Iku
                      "14" -> Just Tenshi
+                     "18" -> Just Utsuho
                      _    -> Just Sanae -- is a good girl (replace with Nothing when
                                         -- character ids are filled out completely
