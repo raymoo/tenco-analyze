@@ -32,6 +32,7 @@ import Data.Text (Text)
 import Data.Text as T (append, pack)
 import Data.Soku.Match
 import Data.Time.ISO8601
+import Data.Soku
 
 -- | Fix to Text
 wombo :: Text -> Text
@@ -108,9 +109,15 @@ playerPage gid uname ms =
                          score) =
               tr $ do
                 td $ toHtml $ formatISO8601 t
-                td $ maybeBold won $ toHtml pName
+                td $ maybeBold won $ toHtml $ pName `T.append`
+                                              " (" `T.append`
+                                              showText pChar `T.append`
+                                              ") "
                 td $ toHtml $ scoreText score
-                td $ maybeBold (not won) $ toHtml oName
+                td $ maybeBold (not won) $ toHtml $ oName `T.append`
+                                                    " (" `T.append`
+                                                    showText oChar `T.append`
+                                                    ") "
           scoreText (score1, score2) = (T.pack . show) score1 `T.append`
                                        " - " `T.append`
                                        (T.pack . show) score2
