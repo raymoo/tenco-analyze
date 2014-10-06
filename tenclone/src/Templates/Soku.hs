@@ -100,8 +100,9 @@ playerPage gid uname ms =
     where gameRow (Match t 
                          g
                          _
-                         pName
+                         pHandle
                          oName
+                         oHandle
                          matched
                          won
                          pChar
@@ -109,7 +110,7 @@ playerPage gid uname ms =
                          score) =
               tr $ do
                 td $ toHtml $ formatISO8601 t
-                td $ maybeBold won $ toHtml $ pName `T.append`
+                td $ maybeBold won $ toHtml $ pHandle `T.append`
                                               " (" `T.append`
                                               showText pChar `T.append`
                                               ") "

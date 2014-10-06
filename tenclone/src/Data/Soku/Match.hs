@@ -33,16 +33,17 @@ $(deriveSafeCopy 0 'base ''Matching)
 
 -- | Represents a match.
 data Match = Match
-    { mTime         :: UTCTime    -- ^ What was the match's time?
-    , mGame         :: GameId     -- ^ Which game
-    , mPlayerName   :: Text       -- ^ The name of the reporting player
-    , mPlayerHandle :: Text       -- ^ In-game name of the player
-    , mOpponentName :: Text       -- ^ The in-game name of their opponent
-    , mMatched      :: Matching   -- ^ Has a match been found?
-    , mWon          :: Bool       -- ^ Did the reporter win?
-    , mPlayerChar   :: Character  -- ^ What character p1 used
-    , mOppChar      :: Character  -- ^ Opponent character
-    , mScore        :: (Int, Int) -- ^ Score, Reporter - Opponent
+    { mTime           :: UTCTime    -- ^ What was the match's time?
+    , mGame           :: GameId     -- ^ Which game
+    , mPlayerName     :: Text       -- ^ The name of the reporting player
+    , mPlayerHandle   :: Text       -- ^ In-game name of the player
+    , mOpponentName   :: Text       -- ^ The in-game name of their opponent
+    , mOpponentHandle :: Maybe Text -- ^ Tracker username of opponent
+    , mMatched        :: Matching   -- ^ Has a match been found?
+    , mWon            :: Bool       -- ^ Did the reporter win?
+    , mPlayerChar     :: Character  -- ^ What character p1 used
+    , mOppChar        :: Character  -- ^ Opponent character
+    , mScore          :: (Int, Int) -- ^ Score, Reporter - Opponent
     } deriving (Eq, Ord, Show, Data, Typeable)
 
 type Name = Text
@@ -59,16 +60,17 @@ requestToMatch user (MatchResult timestamp
                                  p2Score) = madeMatch <$> 
                                             parseISO8601 timestamp <*>
                                             parseId game
-    where madeMatch t g =  Match { mTime         = t
-                                 , mGame         = g
-                                 , mPlayerName   = user
-                                 , mPlayerHandle = p1Name
-                                 , mOpponentName = p2Name
-                                 , mMatched      = Unmatched
-                                 , mWon          = p1Score > p2Score
-                                 , mPlayerChar   = p1Char
-                                 , mOppChar      = p2Char
-                                 , mScore        = (p1Score, p2Score)
+    where madeMatch t g =  Match { mTime           = t
+                                 , mGame           = g
+                                 , mPlayerName     = user
+                                 , mPlayerHandle   = p1Name
+                                 , mOpponentName   = p2Name
+                                 , mOpponentHandle = Nothing
+                                 , mMatched        = Unmatched
+                                 , mWon            = p1Score > p2Score
+                                 , mPlayerChar     = p1Char
+                                 , mOppChar        = p2Char
+                                 , mScore          = (p1Score, p2Score)
                                  }
 $(deriveSafeCopy 0 'base ''Match)
 
