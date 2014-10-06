@@ -25,6 +25,7 @@ import Data.Map as Map
 import Control.Monad.Reader
 import Control.Monad.State
 import Control.Applicative
+import Data.Time (UTCTime)
 
 -- | All the site data
 data TrackerDB = TrackerDB
@@ -69,7 +70,8 @@ addMatch m = modify $ modifyMatch (I.insert m)
 
 -- | Gets the matches a player reported.
 playersMatches :: Text -> Query TrackerDB [Match]
-playersMatches name = I.toList . getEQ (PlayerName name) . matchDB <$> ask
+playersMatches name = I.toDescList (Proxy :: Proxy UTCTime) . 
+                      getEQ (PlayerName name) . matchDB <$> ask
 
 entireSet :: Query TrackerDB (IxSet Match)
 entireSet = matchDB <$> ask
@@ -96,3 +98,4 @@ playerMatches astate = query astate . PlayersMatches
 
 entireSetGet :: AcidState TrackerDB -> IO (IxSet Match)
 entireSetGet astate = query astate EntireSet
+
