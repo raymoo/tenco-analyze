@@ -70,7 +70,7 @@ addMatch m = modify $ modifyMatch (I.insert m)
 
 -- | Gets the matches a player reported.
 playersMatches :: Text -> Query TrackerDB [Match]
-playersMatches name = I.toDescList (Proxy :: Proxy UTCTime) . 
+playersMatches name = I.toDescList (I.Proxy :: I.Proxy UTCTime) . 
                       getEQ (PlayerName name) . matchDB <$> ask
 
 entireSet :: Query TrackerDB (IxSet Match)

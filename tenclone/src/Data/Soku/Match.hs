@@ -75,19 +75,29 @@ requestToMatch user (MatchResult timestamp
 $(deriveSafeCopy 0 'base ''Match)
 
 newtype PlayerName = PlayerName Text
-    deriving (Eq, Ord, Show, Data, Typeable, SafeCopy)
+    deriving (Eq, Ord, Show, Data, Typeable)
+
+deriveSafeCopy 0 'base ''PlayerName
 
 newtype PlayerHandle = PlayerHandle Text
-    deriving (Eq, Ord, Show, Data, Typeable, SafeCopy)
+    deriving (Eq, Ord, Show, Data, Typeable)
+
+deriveSafeCopy 0 'base ''PlayerHandle
 
 newtype OpponentName = OpponentName Text
-    deriving (Eq, Ord, Show, Data, Typeable, SafeCopy)
+    deriving (Eq, Ord, Show, Data, Typeable)
+
+deriveSafeCopy 0 'base ''OpponentName
 
 newtype PChar = PChar Character
-    deriving (Eq, Ord, Show, Data, Typeable, SafeCopy)
+    deriving (Eq, Ord, Show, Data, Typeable)
+
+deriveSafeCopy 0 'base ''PChar
 
 newtype OChar = OChar Character
-    deriving (Eq, Ord, Show, Data, Typeable, SafeCopy)
+    deriving (Eq, Ord, Show, Data, Typeable)
+
+deriveSafeCopy 0 'base ''OChar
 
 instance Indexable Match where
     empty = ixSet [ ixFun $ \m -> [mTime m] 
@@ -102,3 +112,5 @@ instance Indexable Match where
                   , ixFun $ \m -> [mScore m]
                   ]
 
+--matchInsertOp :: IndexOp
+--matchInsertOp 
