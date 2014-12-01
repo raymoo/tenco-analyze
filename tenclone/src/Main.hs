@@ -130,7 +130,7 @@ accountHandler astate = do
         Just acc -> do
                      matches <- liftIO $ playerMatches astate (accName acc) gId
                      writeLBS . renderHtml $ playerPage
-                                             (singleton . intToDigit . idToInt $ gId)
+                                             gId
                                              (decodeUtf8 name)
                                              matches
 

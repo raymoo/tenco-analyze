@@ -74,20 +74,21 @@ playerList ps = table $ mapM_ playerRow ps
                 td $ toHtml pl
                 mapM_ (td . profileLink pl) ["1","2","3","4"]
 
-type GameID = Text
+type IDText   = Text
 type Username = Text
 
-profileLink :: Username -> GameID -> Html
+profileLink :: Username -> IDText -> Html
 profileLink pName gid = a ! href (textValue profAddress) $ toHtml gid
   where profAddress = "game/" `T.append` gid `T.append` "/account/" `T.append` pName
 
-playerPage :: GameID -> Username -> [Match] -> Html
+playerPage :: GameId -> Username -> [Match] -> Html
 playerPage gid uname ms =
     docTypeHtml $ do
       H.head $
         H.title $ toHtml $ uname `append` "'s profile"
       body $ do
-        h1 $ toHtml $ uname `append` "'s stats"
+        h1 $ toHtml $ uname `append` "'s stats" `append`
+                      " Game: " `append` (T.pack $ show gid)
         br
         br
         table $ do
