@@ -58,7 +58,8 @@ site astate =
           , ("search", accountHandler astate)
           , ("game/:id/account/:username", accountHandler astate)
           ] <|>
-    writeBS "There is nothing here." <|>
+    (codeReason 404 "Not Found" >>
+    writeBS "There is nothing here.") <|>
     dir "static" (serveDirectory ".") -- This will never handle anything as the code is currently written
 
 indexHandler :: AcidState TrackerDB -> Snap ()
