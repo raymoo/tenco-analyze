@@ -24,6 +24,7 @@ import           Data.IxSet
 import           Data.IxSet           as I
 import           Data.Map             as Map
 import           Data.SafeCopy
+import           Data.Soku
 import           Data.Soku.Accounts
 import           Data.Soku.Match
 import           Data.Text            (Text)
@@ -71,9 +72,10 @@ addMatch m = modify $ modifyMatch (I.insert m)
               tracker { matchDB = f $ matchDB tracker }
 
 -- | Gets the matches a player reported.
-playersMatches :: Text -> Query TrackerDB [Match]
-playersMatches name = I.toDescList (I.Proxy :: I.Proxy UTCTime) .
-                      getEQ (PlayerName name) . matchDB <$> ask
+playersMatches :: Text -> GameId -> Query TrackerDB [Match]
+playersMatches name gId = I.toDescList (I.Proxy :: I.Proxy UTCTime) .
+                          getEQ (PlayerName name) .
+                          getEQ (gId) . matchDB <$> ask
 
 entireSet :: Query TrackerDB (IxSet Match)
 entireSet = matchDB <$> ask
@@ -95,8 +97,8 @@ tryToLogin astate n p = query astate (AttemptLogin n p)
 insertMatch :: AcidState TrackerDB -> Match -> IO ()
 insertMatch astate = A.update astate . AddMatch
 
-playerMatches :: AcidState TrackerDB -> Text -> IO [Match]
-playerMatches astate = query astate . PlayersMatches
+playerMatches :: AcidState TrackerDB -> Text -> GameId -> IO [Match]
+playerMatches astate p i = query astate $ PlayersMatches p i
 
 entireSetGet :: AcidState TrackerDB -> IO (IxSet Match)
 entireSetGet astate = query astate EntireSet

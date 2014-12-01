@@ -26,6 +26,7 @@ import           Data.Acid                     (AcidState)
 import           Data.Acid.Local               (openLocalState)
 import           Data.ByteString               (ByteString)
 import           Data.ByteString.Char8         (pack)
+import           Data.Char                     (intToDigit)
 import           Data.IxSet                    as I
 import           Data.Maybe                    (listToMaybe, mapMaybe)
 import           Data.Soku
@@ -33,6 +34,7 @@ import           Data.Soku.Accounts
 import           Data.Soku.Match
 import           Data.Soku.Requests
 import           Data.Soku.Requests.Xml
+import           Data.Text                     (singleton)
 import           Data.Text.Encoding            (decodeUtf8)
 import           Data.Time
 import           Data.Time.ISO8601
@@ -117,7 +119,7 @@ accountHandler :: AcidState TrackerDB -> Snap ()
 accountHandler astate = do
   username <- getParam "username"
   gameId <- getParam "id"
-  case (,) <$> username <*> gameId of
+  case (,) <$> username <*> (gameId >>= parseId . decodeUtf8) of
     Nothing          -> codeReason 400 "No name" >>
                         writeBS "400: No name found"
     Just (name, gId) -> do
@@ -126,9 +128,9 @@ accountHandler astate = do
         Nothing  -> codeReason 404 "Account not found" >>
                     writeBS "404: That user does not exist."
         Just acc -> do
-                     matches <- liftIO $ playerMatches astate (accName acc)
+                     matches <- liftIO $ playerMatches astate (accName acc) gId
                      writeLBS . renderHtml $ playerPage
-                                             (decodeUtf8 gId)
+                                             (singleton . intToDigit . idToInt $ gId)
                                              (decodeUtf8 name)
                                              matches
 

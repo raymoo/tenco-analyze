@@ -25,6 +25,7 @@ module Data.Soku ( Character(..)
                  , parseId
                  , parseCharacter
                  , showText
+                 , idToInt
                  ) where
 
 import           Data.Data
@@ -75,6 +76,13 @@ parseId x = case x of
               "3" -> Just HMDemo
               "4" -> Just HM
               _   -> Nothing
+
+-- The tenco game id numbers
+idToInt :: GameId -> Int
+idToInt SWR    = 1
+idToInt Soku   = 2
+idToInt HMDemo = 3
+idToInt HM     = 4
 
 parseCharacter :: Text -> Maybe Character
 parseCharacter t = case t of
