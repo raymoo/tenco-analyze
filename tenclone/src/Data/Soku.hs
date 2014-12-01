@@ -17,7 +17,9 @@
     along with Tenclone.  If not, see <http://www.gnu.org/licenses/>.
 -}
 
-{-# LANGUAGE DeriveDataTypeable, TemplateHaskell, OverloadedStrings #-}
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE OverloadedStrings  #-}
+{-# LANGUAGE TemplateHaskell    #-}
 module Data.Soku ( Character(..)
                  , GameId(..)
                  , parseId
@@ -25,9 +27,9 @@ module Data.Soku ( Character(..)
                  , showText
                  ) where
 
-import Data.Data
-import Data.SafeCopy (deriveSafeCopy, base)
-import Data.Text (Text, pack)
+import           Data.Data
+import           Data.SafeCopy (base, deriveSafeCopy)
+import           Data.Text     (Text, pack)
 
 -- | Enumerates the different characters in hisoutensoku
 data Character = Suika

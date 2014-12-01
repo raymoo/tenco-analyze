@@ -17,7 +17,10 @@
     along with Tenclone.  If not, see <http://www.gnu.org/licenses/>.
 -}
 
-{-# LANGUAGE DeriveDataTypeable, TemplateHaskell, TypeFamilies, OverloadedStrings #-}
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE OverloadedStrings  #-}
+{-# LANGUAGE TemplateHaskell    #-}
+{-# LANGUAGE TypeFamilies       #-}
 module Data.Soku.Accounts(
                            Account
                          , accName
@@ -31,17 +34,19 @@ module Data.Soku.Accounts(
                          , tryLogin
                          ) where
 
-import Data.Map as Map (Map, member, insert, empty, lookup, keys)
-import Data.Soku.Requests
-import Data.Text as T
-import Control.Monad.Reader
-import Control.Monad.State
-import Control.Applicative ((<$>), (<*>), pure)
-import Data.Data
-import Data.Acid (AcidState, Query, Update, makeAcidic, query, update)
-import Data.SafeCopy 
-import Crypto.Hash
-import Data.ByteString.Char8 as BS (pack)
+import           Control.Applicative   (pure, (<$>), (<*>))
+import           Control.Monad.Reader
+import           Control.Monad.State
+import           Crypto.Hash
+import           Data.Acid             (AcidState, Query, Update, makeAcidic,
+                                        query, update)
+import           Data.ByteString.Char8 as BS (pack)
+import           Data.Data
+import           Data.Map              as Map (Map, empty, insert, keys, lookup,
+                                               member)
+import           Data.SafeCopy
+import           Data.Soku.Requests
+import           Data.Text             as T
 
 -- | Represents someone's account information
 type Account = NewAccountReq

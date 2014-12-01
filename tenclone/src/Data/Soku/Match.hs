@@ -1,4 +1,7 @@
-{-# LANGUAGE DeriveDataTypeable, TypeFamilies, TemplateHaskell, GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE DeriveDataTypeable         #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE TemplateHaskell            #-}
+{-# LANGUAGE TypeFamilies               #-}
 
 module Data.Soku.Match (
                          Matching
@@ -9,17 +12,17 @@ module Data.Soku.Match (
                        , requestToMatch
                        )where
 
-import Data.Soku.Requests
-import Data.Text (Text)
-import Data.Soku
-import Data.Time (UTCTime)
-import Data.Time.ISO8601 (parseISO8601)
-import Data.Data
-import Data.IxSet
-import Data.SafeCopy
-import Control.Monad.State
-import Control.Monad.Reader
-import Control.Applicative
+import           Control.Applicative
+import           Control.Monad.Reader
+import           Control.Monad.State
+import           Data.Data
+import           Data.IxSet
+import           Data.SafeCopy
+import           Data.Soku
+import           Data.Soku.Requests
+import           Data.Text            (Text)
+import           Data.Time            (UTCTime)
+import           Data.Time.ISO8601    (parseISO8601)
 
 -- | Unmatched = no corresponding opponent report
 -- Unranked = Hasn't been factored into ranking yet
@@ -57,7 +60,7 @@ requestToMatch user (MatchResult timestamp
                                  p1Score
                                  p2Name
                                  p2Char
-                                 p2Score) = madeMatch <$> 
+                                 p2Score) = madeMatch <$>
                                             parseISO8601 timestamp <*>
                                             parseId game
     where madeMatch t g =  Match { mTime           = t
@@ -100,7 +103,7 @@ newtype OChar = OChar Character
 deriveSafeCopy 0 'base ''OChar
 
 instance Indexable Match where
-    empty = ixSet [ ixFun $ \m -> [mTime m] 
+    empty = ixSet [ ixFun $ \m -> [mTime m]
                   , ixFun $ \m -> [mGame m]
                   , ixFun $ \m -> [PlayerName $ mPlayerName m]
                   , ixFun $ \m -> [PlayerHandle $ mPlayerHandle m]
@@ -113,4 +116,4 @@ instance Indexable Match where
                   ]
 
 --matchInsertOp :: IndexOp
---matchInsertOp 
+--matchInsertOp

@@ -3,15 +3,15 @@ module Data.Soku.Requests.Xml (
                               , parseReportLog
                               ) where
 
-import Text.XML.Light
-import Text.XML.Light.Lexer (XmlSource)
-import Data.Soku.Requests
-import Data.Soku
-import Data.Maybe (listToMaybe, mapMaybe)
-import Control.Applicative
-import Data.Text as T
-import Data.Text.Lazy.Encoding (decodeUtf8)
-import Data.ByteString.Lazy (ByteString)
+import           Control.Applicative
+import           Data.ByteString.Lazy    (ByteString)
+import           Data.Maybe              (listToMaybe, mapMaybe)
+import           Data.Soku
+import           Data.Soku.Requests
+import           Data.Text               as T
+import           Data.Text.Lazy.Encoding (decodeUtf8)
+import           Text.XML.Light
+import           Text.XML.Light.Lexer    (XmlSource)
 
 parseNewAccount :: ByteString -> Maybe NewAccountReq
 parseNewAccount = (xmlToNewAccount =<<) . parseXMLDoc . decodeUtf8
@@ -38,9 +38,9 @@ xmlToNewAccount xml = rootNamePossibly "account" xml *>
 
 data Login = Login  { logName :: T.Text
                     , logPass :: T.Text
-                    } 
+                    }
 
-data Game = Game { gid :: T.Text
+data Game = Game { gid     :: T.Text
                  , matches :: [MatchResult]
                  }
           deriving (Show)
@@ -80,6 +80,6 @@ xmlToReportLog xml = rootNamePossibly "trackrecordPosting" xml >>
           findAccData aXml =
               liftA2 Login
                      (T.pack <$> childTextPossibly "name" aXml)
-                     (T.pack <$> childTextPossibly "password" aXml) 
+                     (T.pack <$> childTextPossibly "password" aXml)
           childPossibly text = listToMaybe $ findChildren (unqual text) xml
 

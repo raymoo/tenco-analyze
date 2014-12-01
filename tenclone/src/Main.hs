@@ -20,31 +20,31 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Main where
 
-import           Data.Maybe (mapMaybe, listToMaybe)
 import           Control.Applicative
-import           Snap.Core
-import           Snap.Util.FileServe
-import           Snap.Http.Server
-import           Data.Soku.Requests.Xml
-import           Data.Soku.Requests
-import           Data.Soku.Match
-import           Data.Tracker
+import           Control.Monad                 (join)
+import           Control.Monad.IO.Class        (liftIO)
+import           Data.Acid                     (AcidState)
+import           Data.Acid.Local               (openLocalState)
+import           Data.ByteString               (ByteString)
+import           Data.ByteString.Char8         (pack)
+import           Data.IxSet                    as I
+import           Data.List                     as L
+import           Data.Maybe                    (listToMaybe, mapMaybe)
+import           Data.Soku
 import           Data.Soku.Accounts
-import           Data.Acid (AcidState)
-import           Data.Acid.Local (openLocalState)
-import           Control.Monad.IO.Class (liftIO)
-import           Data.ByteString.Char8 (pack)
-import           Data.Text.Encoding (decodeUtf8)
-import           Control.Monad (join)
+import           Data.Soku.Match
+import           Data.Soku.Match
+import           Data.Soku.Requests
+import           Data.Soku.Requests.Xml
+import           Data.Text.Encoding            (decodeUtf8)
+import           Data.Time
+import           Data.Time.ISO8601
+import           Data.Tracker
+import           Snap.Core
+import           Snap.Http.Server
+import           Snap.Util.FileServe
 import           Templates.Soku
 import           Text.Blaze.Html.Renderer.Utf8 (renderHtml)
-import           Data.IxSet as I
-import           Data.Soku.Match
-import           Data.List as L
-import           Data.Time.ISO8601
-import           Data.Time
-import           Data.Soku
-import           Data.ByteString (ByteString)
 
 main :: IO ()
 main = openLocalState emptyDB >>=
@@ -63,7 +63,7 @@ site astate =
     dir "static" (serveDirectory ".") -- This will never handle anything as the code is currently written
 
 indexHandler :: AcidState TrackerDB -> Snap ()
-indexHandler astate = 
+indexHandler astate =
     indexPage <$> liftIO (playerList astate) >>=
     writeLBS . renderHtml
 
@@ -86,19 +86,19 @@ lastRecordHandler astate = do
                 I.getEQ (PlayerName $ decodeUtf8 pName)
 
 newAccountHandler :: AcidState TrackerDB -> Snap ()
-newAccountHandler astate = 
-    parseNewAccount <$> readRequestBody maxBound >>= 
-    maybe (codeReason 400 "Bad input" >> 
+newAccountHandler astate =
+    parseNewAccount <$> readRequestBody maxBound >>=
+    maybe (codeReason 400 "Bad input" >>
            writeBS "400: Bad input")
           tryToRegister
         where tryToRegister accReq =
                   liftIO (registerAccount astate accReq) >>=
-                  maybe (writeBS "Success") 
+                  maybe (writeBS "Success")
                         (\err ->
                          codeReason 400 "Registration Failed" >>
                          writeBS "400: Registration failed: " >>
                          (writeBS . pack) (show err))
-                                     
+
 
 matchRecordHandler :: AcidState TrackerDB -> Snap ()
 matchRecordHandler astate =

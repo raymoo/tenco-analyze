@@ -17,17 +17,18 @@
     along with Tenclone.  If not, see <http://www.gnu.org/licenses/>.
 -}
 
-{-# LANGUAGE DeriveDataTypeable, TemplateHaskell #-}
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE TemplateHaskell    #-}
 module Data.Soku.Requests ( ISOTime
                           , NewAccountReq(..)
                           , MatchResult(..)
                           , ReportLog(..)
                           )where
 
-import Data.Soku
-import Data.Text (Text)
-import Data.Data
-import Data.SafeCopy
+import           Data.Data
+import           Data.SafeCopy
+import           Data.Soku
+import           Data.Text     (Text)
 
 type ISOTime = String
 
@@ -57,7 +58,7 @@ data MatchResult = MatchResult
     , mrP2Char    :: Character
     , mrP2Score   :: Int
     } deriving (Show)
-      
+
 
 data ReportLog = ReportLog
     { rlName   :: Text          -- ^ Account name

@@ -23,16 +23,16 @@ module Templates.Soku(
                      , playerPage
                      ) where
 
-import Text.Blaze.Html5
-import Text.Blaze.Html5.Attributes
-import Text.Blaze.Internal (textValue)
-import qualified Text.Blaze.Html5 as H
+import           Data.Soku
+import           Data.Soku.Match
+import           Data.Text                   (Text)
+import           Data.Text                   as T (append, pack)
+import           Data.Time.ISO8601
+import           Text.Blaze.Html5
+import qualified Text.Blaze.Html5            as H
+import           Text.Blaze.Html5.Attributes
 import qualified Text.Blaze.Html5.Attributes as A
-import Data.Text (Text)
-import Data.Text as T (append, pack)
-import Data.Soku.Match
-import Data.Time.ISO8601
-import Data.Soku
+import           Text.Blaze.Internal         (textValue)
 
 -- | Fix to Text
 wombo :: Text -> Text
@@ -40,7 +40,7 @@ wombo = Prelude.id
 
 -- | Index page done in blaze because I am lazy
 indexPage :: [Text] -> Html
-indexPage ps = 
+indexPage ps =
     docTypeHtml $ do
       H.head $
         H.title "Welcome to Tenclone!"
@@ -82,7 +82,7 @@ profileLink pName gid = a ! href (textValue profAddress) $ toHtml gid
   where profAddress = "game/" `T.append` gid `T.append` "/account/" `T.append` pName
 
 playerPage :: GameID -> Username -> [Match] -> Html
-playerPage gid uname ms = 
+playerPage gid uname ms =
     docTypeHtml $ do
       H.head $
         H.title $ toHtml $ uname `append` "'s profile"
@@ -90,14 +90,14 @@ playerPage gid uname ms =
         h1 $ toHtml $ uname `append` "'s stats"
         br
         br
-        table $ do 
+        table $ do
                tr $ do
                      td $ toHtml $ wombo "Time"
                      td $ toHtml $ wombo "Player"
                      td $ toHtml $ wombo "Score"
                      td $ toHtml $ wombo "Opponent"
                mapM_ gameRow ms
-    where gameRow (Match t 
+    where gameRow (Match t
                          g
                          _
                          pHandle

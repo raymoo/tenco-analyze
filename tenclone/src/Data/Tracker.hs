@@ -1,4 +1,6 @@
-{-# LANGUAGE TemplateHaskell, TypeFamilies, DeriveDataTypeable #-}
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE TemplateHaskell    #-}
+{-# LANGUAGE TypeFamilies       #-}
 
 module Data.Tracker (
                       TrackerDB
@@ -12,26 +14,26 @@ module Data.Tracker (
                     , entireSetGet
                     ) where
 
-import Data.Soku.Accounts
-import Data.Soku.Match
-import Data.Data
-import Data.SafeCopy
-import Data.Acid
-import Data.Acid as A
-import Data.IxSet
-import Data.IxSet as I
-import Data.Text (Text)
-import Data.Map as Map
-import Control.Monad.Reader
-import Control.Monad.State
-import Control.Applicative
-import Data.Time (UTCTime)
+import           Control.Applicative
+import           Control.Monad.Reader
+import           Control.Monad.State
+import           Data.Acid
+import           Data.Acid            as A
+import           Data.Data
+import           Data.IxSet
+import           Data.IxSet           as I
+import           Data.Map             as Map
+import           Data.SafeCopy
+import           Data.Soku.Accounts
+import           Data.Soku.Match
+import           Data.Text            (Text)
+import           Data.Time            (UTCTime)
 
 -- | All the site data
 data TrackerDB = TrackerDB
     { accountDB :: AccountList
     , matchDB   :: IxSet Match
-    } 
+    }
                  deriving (Eq, Ord, Show, Data, Typeable)
 
 -- | Initial state with no account or match entries
@@ -48,7 +50,7 @@ queryAccount name = Map.lookup name . accList . accountDB <$> ask
 -- returns 'Just error' on failure
 regUpdate :: Account -> Update TrackerDB (Maybe RegError)
 regUpdate acc = register . accountDB <$> get <*> pure acc >>= \result ->
-                either (return . Just) 
+                either (return . Just)
                        (\list -> modify (putList list) >> return Nothing)
                        result
     where putList list tDB = tDB { accountDB = list }
@@ -70,7 +72,7 @@ addMatch m = modify $ modifyMatch (I.insert m)
 
 -- | Gets the matches a player reported.
 playersMatches :: Text -> Query TrackerDB [Match]
-playersMatches name = I.toDescList (I.Proxy :: I.Proxy UTCTime) . 
+playersMatches name = I.toDescList (I.Proxy :: I.Proxy UTCTime) .
                       getEQ (PlayerName name) . matchDB <$> ask
 
 entireSet :: Query TrackerDB (IxSet Match)
