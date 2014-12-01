@@ -10,12 +10,14 @@ import Data.Soku
 import Data.Maybe (listToMaybe, mapMaybe)
 import Control.Applicative
 import Data.Text as T
+import Data.Text.Lazy.Encoding (decodeUtf8)
+import Data.ByteString.Lazy (ByteString)
 
-parseNewAccount :: XmlSource s => s -> Maybe NewAccountReq
-parseNewAccount = (xmlToNewAccount =<<) . parseXMLDoc
+parseNewAccount :: ByteString -> Maybe NewAccountReq
+parseNewAccount = (xmlToNewAccount =<<) . parseXMLDoc . decodeUtf8
 
-parseReportLog :: XmlSource s => s -> Maybe ReportLog
-parseReportLog = (xmlToReportLog =<<) . parseXMLDoc
+parseReportLog :: ByteString -> Maybe ReportLog
+parseReportLog = (xmlToReportLog =<<) . parseXMLDoc . decodeUtf8
 
 rootNamePossibly :: String -> Element -> Maybe Element
 rootNamePossibly t xml
