@@ -11,7 +11,6 @@ import           Data.Soku.Requests
 import           Data.Text               as T
 import           Data.Text.Lazy.Encoding (decodeUtf8)
 import           Text.XML.Light
-import           Text.XML.Light.Lexer    (XmlSource)
 
 parseNewAccount :: ByteString -> Maybe NewAccountReq
 parseNewAccount = (xmlToNewAccount =<<) . parseXMLDoc . decodeUtf8

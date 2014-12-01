@@ -13,8 +13,6 @@ module Data.Soku.Match (
                        )where
 
 import           Control.Applicative
-import           Control.Monad.Reader
-import           Control.Monad.State
 import           Data.Data
 import           Data.IxSet
 import           Data.SafeCopy

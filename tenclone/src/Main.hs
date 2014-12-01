@@ -21,18 +21,15 @@
 module Main where
 
 import           Control.Applicative
-import           Control.Monad                 (join)
 import           Control.Monad.IO.Class        (liftIO)
 import           Data.Acid                     (AcidState)
 import           Data.Acid.Local               (openLocalState)
 import           Data.ByteString               (ByteString)
 import           Data.ByteString.Char8         (pack)
 import           Data.IxSet                    as I
-import           Data.List                     as L
 import           Data.Maybe                    (listToMaybe, mapMaybe)
 import           Data.Soku
 import           Data.Soku.Accounts
-import           Data.Soku.Match
 import           Data.Soku.Match
 import           Data.Soku.Requests
 import           Data.Soku.Requests.Xml

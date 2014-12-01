@@ -34,15 +34,10 @@ module Data.Soku.Accounts(
                          , tryLogin
                          ) where
 
-import           Control.Applicative   (pure, (<$>), (<*>))
-import           Control.Monad.Reader
-import           Control.Monad.State
 import           Crypto.Hash
-import           Data.Acid             (AcidState, Query, Update, makeAcidic,
-                                        query, update)
 import           Data.ByteString.Char8 as BS (pack)
 import           Data.Data
-import           Data.Map              as Map (Map, empty, insert, keys, lookup,
+import           Data.Map              as Map (Map, empty, insert, lookup,
                                                member)
 import           Data.SafeCopy
 import           Data.Soku.Requests
