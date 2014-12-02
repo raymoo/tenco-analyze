@@ -15,6 +15,7 @@ module Data.Soku.Match (
 
 import           Control.Applicative
 import           Data.Data
+import           Data.Foldable       (foldMap)
 import           Data.IxSet
 import qualified Data.IxSet          as I
 import           Data.Maybe          (listToMaybe)
@@ -49,7 +50,29 @@ data Match = Match
     , mPlayerChar     :: Character  -- ^ What character p1 used
     , mOppChar        :: Character  -- ^ Opponent character
     , mScore          :: (Int, Int) -- ^ Score, Reporter - Opponent
-    } deriving (Eq, Ord, Show, Data, Typeable)
+    } deriving (Show, Data, Typeable)
+
+instance Eq Match where
+  m1 == m2 = compareMatch m1 m2 == EQ
+
+instance Ord Match where
+  compare = compareMatch
+
+compareMatch :: Match -> Match -> Ordering
+compareMatch m1 m2 = foldMap ($ (m1,m2)) comparisons
+  where compareOn :: Ord b => (a -> b) -> a -> a -> Ordering
+        compareOn f x y = compare (f x) (f y)
+        comparisons =
+          map (uncurry)
+          [ compareOn mTime
+          , compareOn mGame
+          , compareOn mPlayerHandle
+          , compareOn mOpponentName
+          , compareOn mWon
+          , compareOn mPlayerChar
+          , compareOn mOppChar
+          , compareOn mScore
+          ]
 
 type Name = Text
 
