@@ -72,13 +72,16 @@ playerList ps = table $ mapM_ playerRow ps
     where playerRow pl =
               tr $ do
                 td $ toHtml pl
-                mapM_ (td . profileLink pl) ["1","2","3","4"]
+                mapM_ (td . numProfileLink pl) ["1","2","3","4"]
 
 type IDText   = Text
 type Username = Text
 
-profileLink :: Username -> IDText -> Html
-profileLink pName gid = a ! href (textValue profAddress) $ toHtml gid
+numProfileLink :: Username -> IDText -> Html
+numProfileLink pName gid = profileLink pName gid gid
+
+profileLink :: Username -> IDText -> Text -> Html
+profileLink pName gid text = a ! href (textValue profAddress) $ toHtml text
   where profAddress = "game/" `T.append` gid `T.append` "/account/" `T.append` pName
 
 playerPage :: GameId -> Username -> [Match] -> Html
@@ -110,16 +113,19 @@ playerPage gid uname ms =
                          oChar
                          score) =
               tr $ do
+                let idText = showText . idToInt $ gid
+                    playerHtml = toHtml $
+                                 pHandle `T.append`
+                                 " (" `T.append`
+                                 showText pChar `T.append`
+                                 ") "
+                    oppHtml = do
+                      maybe (toHtml oName) (\n -> profileLink n idText n) oHandle
+                      toHtml $ " (" `T.append` showText oChar `T.append` ") "
                 td $ toHtml $ formatISO8601 t
-                td $ maybeBold won $ toHtml $ pHandle `T.append`
-                                              " (" `T.append`
-                                              showText pChar `T.append`
-                                              ") "
+                td $ maybeBold won $ playerHtml
                 td $ toHtml $ scoreText score
-                td $ maybeBold (not won) $ toHtml $ oName `T.append`
-                                                    " (" `T.append`
-                                                    showText oChar `T.append`
-                                                    ") "
+                td $ maybeBold (not won) $ oppHtml
           scoreText (score1, score2) = (T.pack . show) score1 `T.append`
                                        " - " `T.append`
                                        (T.pack . show) score2
