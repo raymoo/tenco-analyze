@@ -85,13 +85,16 @@ profileLink :: Username -> IDText -> Text -> Html
 profileLink pName gid text = a ! href (textValue profAddress) $ toHtml text
   where profAddress = "game/" `T.append` gid `T.append` "/account/" `T.append` pName
 
-playerTitle :: GameId -> Username -> Int -> Html
-playerTitle gid uname score = do
+playerTitle :: GameId -> Username -> Rating -> Html
+playerTitle gid uname rating = do
   h1 $ toHtml $ uname `append` "'s profile"
   br
   toHtml $ "Game: " `append` (T.pack $ show gid)
   br
-  toHtml $ "Score: " `append` (T.pack $ show score)
+  toHtml $ "Score: " `append` (T.pack $ show (rScore rating)) `append`
+                              " (+/-" `append`
+                              (T.pack $ show (rDev rating)) `append`
+                              ")"
 
 playerPage :: GameId -> Account -> [Match] -> Html
 playerPage gid acc ms =
@@ -100,7 +103,7 @@ playerPage gid acc ms =
       H.head $
         H.title $ toHtml $ uname `append` "'s profile"
       body $ do
-        playerTitle gid uname (rScore . accRating $ acc)
+        playerTitle gid uname (accRating $ acc)
         br
         br
         table $ do
