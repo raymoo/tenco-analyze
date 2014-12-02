@@ -87,7 +87,7 @@ lastRecordHandler astate = do
 
 newAccountHandler :: AcidState TrackerDB -> Snap ()
 newAccountHandler astate =
-    parseNewAccount <$> readRequestBody maxBound >>=
+    fmap reqToAcc . parseNewAccount <$> readRequestBody maxBound >>=
     maybe (codeReason 400 "Bad input" >>
            writeBS "400: Bad input")
           tryToRegister

@@ -22,10 +22,9 @@
 {-# LANGUAGE TemplateHaskell    #-}
 {-# LANGUAGE TypeFamilies       #-}
 module Data.Soku.Accounts(
-                           Account
-                         , accName
-                         , accPass
-                         , accMail
+                           Account(..)
+                         , Rating(..)
+                         , reqToAcc
                          , AccountList(..)
                          , register
                          , emptyAccList
@@ -43,11 +42,34 @@ import           Data.SafeCopy
 import           Data.Soku.Requests
 import           Data.Text             as T
 
+-- | Glicko rating
+data Rating =
+  Rating { rScore :: Int
+         , rDev   :: Int -- deviation
+         }
+  deriving (Show, Eq, Ord, Data, Typeable)
+
+deriveSafeCopy 0 'base ''Rating
+
 -- | Represents someone's account information
-type Account = NewAccountReq
-accName = newName
-accPass = newPassword
-accMail = newMail
+data Account =
+  Account { accName   :: Text
+          , accPass   :: Text
+          , accMail   :: Text
+          , accRating :: Rating
+          } 
+  deriving (Show, Data, Typeable)
+
+instance Eq Account where
+  a1 == a2 = accName a1 == accName a2
+
+instance Ord Account where
+  compare a1 a2 = compare (accName a1) (accName a2)
+
+deriveSafeCopy 0 'base ''Account
+
+defRating :: Rating
+defRating = Rating 1200 350
 
 -- | List of registered accounts
 data AccountList = AccountList { accList :: Map.Map T.Text Account }
@@ -93,3 +115,11 @@ tryLogin (AccountList as) n p =
                   then Nothing
                   else Just WrongPassword
   where makePasswordHash bs = show (hash bs :: Digest SHA1)
+
+reqToAcc :: NewAccountReq -> Account
+reqToAcc (NewAccountReq name pass mail) =
+  Account { accName   = name
+          , accPass   = pass
+          , accMail   = mail
+          , accRating = defRating
+          } 
