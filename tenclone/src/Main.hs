@@ -132,7 +132,7 @@ accountHandler astate = do
                      matches <- liftIO $ playerMatches astate (accName acc) gId
                      writeLBS . renderHtml $ playerPage
                                              gId
-                                             (decodeUtf8 name)
+                                             acc
                                              matches
 
 codeReason :: Int -> ByteString -> Snap ()

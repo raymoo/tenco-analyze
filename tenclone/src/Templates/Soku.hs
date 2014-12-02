@@ -24,6 +24,7 @@ module Templates.Soku(
                      ) where
 
 import           Data.Soku
+import           Data.Soku.Accounts          (Account(..), Rating(..))
 import           Data.Soku.Match
 import           Data.Text                   (Text)
 import           Data.Text                   as T (append, pack)
@@ -84,14 +85,22 @@ profileLink :: Username -> IDText -> Text -> Html
 profileLink pName gid text = a ! href (textValue profAddress) $ toHtml text
   where profAddress = "game/" `T.append` gid `T.append` "/account/" `T.append` pName
 
-playerPage :: GameId -> Username -> [Match] -> Html
-playerPage gid uname ms =
+playerTitle :: GameId -> Username -> Int -> Html
+playerTitle gid uname score = do
+  h1 $ toHtml $ uname `append` "'s profile"
+  br
+  toHtml $ "Game: " `append` (T.pack $ show gid)
+  br
+  toHtml $ "Score: " `append` (T.pack $ show score)
+
+playerPage :: GameId -> Account -> [Match] -> Html
+playerPage gid acc ms =
     docTypeHtml $ do
+      let uname = accName acc
       H.head $
         H.title $ toHtml $ uname `append` "'s profile"
       body $ do
-        h1 $ toHtml $ uname `append` "'s stats" `append`
-                      " Game: " `append` (T.pack $ show gid)
+        playerTitle gid uname (rScore . accRating $ acc)
         br
         br
         table $ do
