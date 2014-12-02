@@ -69,7 +69,7 @@ instance Ord Account where
 deriveSafeCopy 0 'base ''Account
 
 defRating :: Rating
-defRating = Rating 1200 350
+defRating = Rating 1500 350
 
 -- | List of registered accounts
 data AccountList = AccountList { accList :: Map.Map T.Text Account }
