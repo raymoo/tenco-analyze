@@ -10,17 +10,21 @@ module Data.Soku.Match (
                        , PlayerHandle(..)
                        , OpponentName(..)
                        , requestToMatch
+                       , matchInsert
                        )where
 
 import           Control.Applicative
 import           Data.Data
 import           Data.IxSet
+import qualified Data.IxSet          as I
+import           Data.Maybe          (listToMaybe)
 import           Data.SafeCopy
 import           Data.Soku
 import           Data.Soku.Requests
-import           Data.Text            (Text)
-import           Data.Time            (UTCTime)
-import           Data.Time.ISO8601    (parseISO8601)
+import           Data.Text           (Text)
+import           Data.Time           (UTCTime, addUTCTime)
+import           Data.Time.ISO8601   (parseISO8601)
+import           Data.Tuple          (swap)
 
 -- | Unmatched = no corresponding opponent report
 -- Unranked = Hasn't been factored into ranking yet
@@ -113,5 +117,33 @@ instance Indexable Match where
                   , ixFun $ \m -> [mScore m]
                   ]
 
---matchInsertOp :: IndexOp
---matchInsertOp
+-- | Insert a match, updating any matches (as in matching matches)
+matchInsert :: Match -> IxSet Match -> IxSet Match
+matchInsert new set =
+  case possibleMatch of
+   Nothing    -> I.insert new set
+   Just match -> I.insert updated .
+                 I.insert new' .
+                 I.delete match $ set
+     where updated =
+             match { mMatched = Unranked
+                   , mOpponentHandle = Just $ mPlayerName new }
+           new' =
+             new { mMatched = Unranked
+                 , mOpponentHandle = Just $ mPlayerName match }
+  where timeRange = (addUTCTime (-60) newTime, addUTCTime 60 newTime)
+        newTime = mTime new
+        possibleMatch = listToMaybe .
+                        I.toAscList (I.Proxy :: I.Proxy UTCTime) .
+                        -- Check if the names match
+                        I.getEQ (OpponentName $ mPlayerHandle new) .
+                        I.getEQ (PlayerHandle $ mOpponentName new) .
+                        -- Check if it's the same game type
+                        I.getEQ (mGame new) .
+                        -- Check if the characters are the same
+                        I.getEQ (PChar $ mOppChar new) .
+                        I.getEQ (OChar $ mPlayerChar new) .
+                        -- Check if the scores are the same
+                        I.getEQ (swap $ mScore new) $
+                        -- Filter to times within a minute
+                        (uncurry I.getRange timeRange set)

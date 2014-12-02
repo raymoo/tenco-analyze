@@ -67,7 +67,7 @@ listOfPlayers = getKeys . accountDB <$> ask
 
 -- | Inserts a match into the database
 addMatch :: Match -> Update TrackerDB ()
-addMatch m = modify $ modifyMatch (I.insert m)
+addMatch m = modify $ modifyMatch (matchInsert m)
     where modifyMatch f tracker =
               tracker { matchDB = f $ matchDB tracker }
 
