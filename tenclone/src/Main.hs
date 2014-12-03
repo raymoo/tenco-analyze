@@ -49,6 +49,10 @@ main :: IO ()
 main = openLocalState emptyDB >>=
        quickHttpServe . site
 
+unicodeHeader :: Snap ()
+unicodeHeader = modifyResponse $
+                  setHeader "Content-Type" "text/html; charset=utf-8"
+
 site :: AcidState TrackerDB -> Snap ()
 site astate =
     ifTop (indexHandler astate) <|>
@@ -64,6 +68,7 @@ site astate =
 
 indexHandler :: AcidState TrackerDB -> Snap ()
 indexHandler astate =
+    unicodeHeader >>
     indexPage <$> liftIO (playerList astate) >>=
     writeLBS . renderHtml
 
@@ -118,6 +123,7 @@ matchRecordHandler astate =
 
 accountHandler :: AcidState TrackerDB -> Snap ()
 accountHandler astate = do
+  unicodeHeader
   username <- getParam "username"
   gameId <- getParam "id"
   case (,) <$> username <*> (gameId >>= parseId . decodeUtf8) of
