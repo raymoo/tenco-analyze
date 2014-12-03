@@ -23,7 +23,6 @@
 {-# LANGUAGE TypeFamilies       #-}
 module Data.Soku.Accounts(
                            Account(..)
-                         , Rating(..)
                          , reqToAcc
                          , AccountList(..)
                          , register
@@ -38,18 +37,10 @@ import           Data.ByteString.Char8 as BS (pack)
 import           Data.Data
 import           Data.Map              as Map (Map, empty, insert, lookup,
                                                member)
+import           Data.Rating.Glicko
 import           Data.SafeCopy
 import           Data.Soku.Requests
 import           Data.Text             as T
-
--- | Glicko rating
-data Rating =
-  Rating { rScore :: Int
-         , rDev   :: Int -- deviation
-         }
-  deriving (Show, Eq, Ord, Data, Typeable)
-
-deriveSafeCopy 0 'base ''Rating
 
 -- | Represents someone's account information
 data Account =
@@ -67,9 +58,6 @@ instance Ord Account where
   compare a1 a2 = compare (accName a1) (accName a2)
 
 deriveSafeCopy 0 'base ''Account
-
-defRating :: Rating
-defRating = Rating 1500 350
 
 -- | List of registered accounts
 data AccountList = AccountList { accList :: Map.Map T.Text Account }

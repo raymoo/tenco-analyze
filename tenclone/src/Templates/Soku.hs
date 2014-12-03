@@ -23,8 +23,9 @@ module Templates.Soku(
                      , playerPage
                      ) where
 
+import           Data.Rating.Glicko          (Rating(..))
 import           Data.Soku
-import           Data.Soku.Accounts          (Account(..), Rating(..))
+import           Data.Soku.Accounts          (Account(..))
 import           Data.Soku.Match
 import           Data.Text                   (Text)
 import           Data.Text                   as T (append, pack)
