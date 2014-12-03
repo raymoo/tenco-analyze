@@ -83,7 +83,7 @@ numProfileLink pName gid = profileLink pName gid gid
 
 profileLink :: Username -> IDText -> Text -> Html
 profileLink pName gid text = a ! href (textValue profAddress) $ toHtml text
-  where profAddress = "game/" `T.append` gid `T.append` "/account/" `T.append` pName
+  where profAddress = "/game/" `T.append` gid `T.append` "/account/" `T.append` pName
 
 playerTitle :: GameId -> Username -> Rating -> Html
 playerTitle gid uname rating = do
