@@ -24,6 +24,7 @@ import           Data.Maybe          (listToMaybe, mapMaybe)
 import           Data.Rating.Glicko
 import           Data.SafeCopy
 import           Data.Soku
+import           Data.Soku.Accounts
 import           Data.Soku.Requests
 import           Data.Text           (Text)
 import           Data.Time           (UTCTime, addUTCTime)
@@ -53,6 +54,7 @@ data Match = Match
     , mPlayerChar     :: Character    -- ^ What character p1 used
     , mOppChar        :: Character    -- ^ Opponent character
     , mScore          :: (Int, Int)   -- ^ Score, Reporter - Opponent
+    , pRating         :: Rating       -- ^ Player's rating when reporting
     , oRating         :: Maybe Rating -- ^ Opponent rating
     } deriving (Show, Data, Typeable)
 
@@ -81,8 +83,8 @@ compareMatch m1 m2 = foldMap ($ (m1,m2)) comparisons
 type Name = Text
 
 -- | Makes a match log request into a match
-requestToMatch :: Name -> MatchResult -> Maybe Match
-requestToMatch user (MatchResult timestamp
+requestToMatch :: Account -> MatchResult -> Maybe Match
+requestToMatch acc (MatchResult timestamp
                                  game
                                  p1Name
                                  p1Char
@@ -94,7 +96,7 @@ requestToMatch user (MatchResult timestamp
                                             parseId game
     where madeMatch t g =  Match { mTime           = t
                                  , mGame           = g
-                                 , mPlayerName     = user
+                                 , mPlayerName     = username
                                  , mPlayerHandle   = p1Name
                                  , mOpponentName   = p2Name
                                  , mOpponentHandle = Nothing
@@ -103,8 +105,11 @@ requestToMatch user (MatchResult timestamp
                                  , mPlayerChar     = p1Char
                                  , mOppChar        = p2Char
                                  , mScore          = (p1Score, p2Score)
+                                 , pRating         = rating
                                  , oRating         = Nothing
                                  }
+          username = accName acc
+          rating = accRating acc
 $(deriveSafeCopy 0 'base ''Match)
 
 newtype PlayerName = PlayerName Text

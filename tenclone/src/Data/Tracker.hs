@@ -57,7 +57,7 @@ regUpdate acc = register . accountDB <$> get <*> pure acc >>= \result ->
     where putList list tDB = tDB { accountDB = list }
 
 -- | Attempts a login. Returns 'Just error' if there was a problem.
-attemptLogin :: Text -> Text -> Query TrackerDB (Maybe LoginError)
+attemptLogin :: Text -> Text -> Query TrackerDB (Either LoginError Account)
 attemptLogin n p = tryLogin . accountDB <$> ask <*> pure n <*> pure p
 
 -- | Return a list of players
@@ -91,7 +91,7 @@ findAccount astate name = query astate (QueryAccount name)
 playerList :: AcidState TrackerDB -> IO [Text]
 playerList astate = query astate ListOfPlayers
 
-tryToLogin :: AcidState TrackerDB -> Text -> Text -> IO (Maybe LoginError)
+tryToLogin :: AcidState TrackerDB -> Text -> Text -> IO (Either LoginError Account)
 tryToLogin astate n p = query astate (AttemptLogin n p)
 
 insertMatch :: AcidState TrackerDB -> Match -> IO ()

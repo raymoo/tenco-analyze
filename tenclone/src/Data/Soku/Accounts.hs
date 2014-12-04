@@ -95,13 +95,13 @@ $(deriveSafeCopy 0 'base ''LoginError)
 tryLogin :: AccountList ->
             T.Text      -> -- ^ Username
             T.Text      -> -- ^ Password
-            Maybe LoginError
+            Either LoginError Account
 tryLogin (AccountList as) n p =
     case Map.lookup n as of
-      Nothing  -> Just NonexistentAccount
+      Nothing  -> Left NonexistentAccount
       Just acc -> if T.unpack p == makePasswordHash (BS.pack . T.unpack $ accPass acc)
-                  then Nothing
-                  else Just WrongPassword
+                  then Right acc
+                  else Left WrongPassword
   where makePasswordHash bs = show (hash bs :: Digest SHA1)
 
 reqToAcc :: NewAccountReq -> Account

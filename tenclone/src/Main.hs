@@ -104,7 +104,6 @@ newAccountHandler astate =
                          writeBS "400: Registration failed: " >>
                          (writeBS . pack) (show err))
 
-
 matchRecordHandler :: AcidState TrackerDB -> Snap ()
 matchRecordHandler astate =
     parseReportLog <$> readRequestBody maxBound >>= \maybeLog ->
@@ -113,13 +112,14 @@ matchRecordHandler astate =
                    writeBS "400: Bad Time"
       Just mLog -> loginAttempt mLog >>= \attempt ->
                    case attempt of
-                     Just err -> codeReason 400 "Login Failure" >>
-                                 writeBS "400: Login failed: " >>
-                                 (writeBS . pack $ show err)
-                     Nothing  -> liftIO $ makeList mLog
-  where loginAttempt mLog' = liftIO $ tryToLogin astate (rlName mLog') (rlPass mLog')
-        makeList (ReportLog n _ gid mrs _) =
-            mapM_ (insertMatch astate) . mapMaybe (requestToMatch n) $ mrs
+                     Left err   -> codeReason 400 "Login Failure" >>
+                                   writeBS "400: Login failed: " >>
+                                   (writeBS . pack $ show err)
+                     Right acc  -> liftIO $ makeList acc mLog
+  where loginAttempt mLog' = liftIO $
+          tryToLogin astate (rlName mLog') (rlPass mLog')
+        makeList acc (ReportLog _ _ _ mrs _) =
+            mapM_ (insertMatch astate) . mapMaybe (requestToMatch acc) $ mrs
 
 accountHandler :: AcidState TrackerDB -> Snap ()
 accountHandler astate = do
