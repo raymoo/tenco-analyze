@@ -114,17 +114,15 @@ playerPage gid acc ms =
                      td $ toHtml $ wombo "Score"
                      td $ toHtml $ wombo "Opponent"
                mapM_ gameRow ms
-    where gameRow (Match t
-                         g
-                         _
-                         pHandle
-                         oName
-                         oHandle
-                         matched
-                         won
-                         pChar
-                         oChar
-                         score) =
+    where gameRow Match { mTime = t
+                        , mPlayerHandle = pHandle
+                        , mOpponentName = oName
+                        , mOpponentHandle = oHandle
+                        , mWon = won
+                        , mPlayerChar = pChar
+                        , mOppChar = oChar
+                        , mScore = score
+                        } =
               tr $ do
                 let idText = showText . idToInt $ gid
                     playerHtml = toHtml $
