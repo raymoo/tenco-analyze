@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveDataTypeable         #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE TemplateHaskell            #-}
+{-# LANGUAGE TupleSections              #-}
 {-# LANGUAGE TypeFamilies               #-}
 
 module Data.Soku.Match (
@@ -11,6 +12,7 @@ module Data.Soku.Match (
                        , OpponentName(..)
                        , requestToMatch
                        , matchInsert
+                       , advanceRating
                        )where
 
 import           Control.Applicative
@@ -18,7 +20,8 @@ import           Data.Data
 import           Data.Foldable       (foldMap)
 import           Data.IxSet
 import qualified Data.IxSet          as I
-import           Data.Maybe          (listToMaybe)
+import           Data.Maybe          (listToMaybe, mapMaybe)
+import           Data.Rating.Glicko
 import           Data.SafeCopy
 import           Data.Soku
 import           Data.Soku.Requests
@@ -39,17 +42,18 @@ $(deriveSafeCopy 0 'base ''Matching)
 
 -- | Represents a match.
 data Match = Match
-    { mTime           :: UTCTime    -- ^ What was the match's time?
-    , mGame           :: GameId     -- ^ Which game
-    , mPlayerName     :: Text       -- ^ The name of the reporting player
-    , mPlayerHandle   :: Text       -- ^ In-game name of the player
-    , mOpponentName   :: Text       -- ^ The in-game name of their opponent
-    , mOpponentHandle :: Maybe Text -- ^ Tracker username of opponent
-    , mMatched        :: Matching   -- ^ Has a match been found?
-    , mWon            :: Bool       -- ^ Did the reporter win?
-    , mPlayerChar     :: Character  -- ^ What character p1 used
-    , mOppChar        :: Character  -- ^ Opponent character
-    , mScore          :: (Int, Int) -- ^ Score, Reporter - Opponent
+    { mTime           :: UTCTime      -- ^ What was the match's time?
+    , mGame           :: GameId       -- ^ Which game
+    , mPlayerName     :: Text         -- ^ The name of the reporting player
+    , mPlayerHandle   :: Text         -- ^ In-game name of the player
+    , mOpponentName   :: Text         -- ^ The in-game name of their opponent
+    , mOpponentHandle :: Maybe Text   -- ^ Tracker username of opponent
+    , mMatched        :: Matching     -- ^ Has a match been found?
+    , mWon            :: Bool         -- ^ Did the reporter win?
+    , mPlayerChar     :: Character    -- ^ What character p1 used
+    , mOppChar        :: Character    -- ^ Opponent character
+    , mScore          :: (Int, Int)   -- ^ Score, Reporter - Opponent
+    , oRating         :: Maybe Rating -- ^ Opponent rating
     } deriving (Show, Data, Typeable)
 
 instance Eq Match where
@@ -99,6 +103,7 @@ requestToMatch user (MatchResult timestamp
                                  , mPlayerChar     = p1Char
                                  , mOppChar        = p2Char
                                  , mScore          = (p1Score, p2Score)
+                                 , oRating         = Nothing
                                  }
 $(deriveSafeCopy 0 'base ''Match)
 
@@ -170,3 +175,13 @@ matchInsert new set =
                         I.getEQ (swap $ mScore new) $
                         -- Filter to times within a minute
                         (uncurry I.getRange timeRange set)
+
+-- | Rating unknown for matches that have no known opponent
+mToO :: Match -> Maybe Outcome
+mToO Match { mWon = won, oRating = o } = fmap (, wlt) o
+  where wlt = case won of
+               True  -> W
+               False -> L
+
+advanceARating :: [Match] -> Rating -> Rating
+advanceARating = advanceRating . mapMaybe mToO
