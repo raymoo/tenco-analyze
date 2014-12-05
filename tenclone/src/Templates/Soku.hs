@@ -92,9 +92,9 @@ playerTitle gid uname rating = do
   br
   toHtml $ "Game: " `append` (T.pack $ show gid)
   br
-  toHtml $ "Score: " `append` (T.pack $ show (rScore rating)) `append`
+  toHtml $ "Score: " `append` (T.pack $ show (round $ rScore rating)) `append`
                               " (+/-" `append`
-                              (T.pack $ show (rDev rating)) `append`
+                              (T.pack $ show (round $ rDev rating)) `append`
                               ")"
 
 playerPage :: GameId -> Account -> [Match] -> Html
