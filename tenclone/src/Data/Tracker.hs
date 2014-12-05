@@ -80,7 +80,14 @@ playersMatches name gId = I.toDescList (I.Proxy :: I.Proxy UTCTime) .
 entireSet :: Query TrackerDB (IxSet Match)
 entireSet = matchDB <$> ask
 
-$(makeAcidic ''TrackerDB ['regUpdate, 'queryAccount, 'listOfPlayers, 'attemptLogin, 'addMatch, 'playersMatches, 'entireSet])
+conductRatings :: Update TrackerDB ()
+conductRatings =
+  modify $ updateDB
+  where updateDB (TrackerDB (AccountList as) ms) =
+          let (as', ms') = rateAccounts as ms
+          in TrackerDB (AccountList as') ms'
+
+$(makeAcidic ''TrackerDB ['regUpdate, 'queryAccount, 'listOfPlayers, 'attemptLogin, 'addMatch, 'playersMatches, 'entireSet, 'conductRatings])
 
 registerAccount :: AcidState TrackerDB -> Account -> IO (Maybe RegError)
 registerAccount astate acc = A.update astate (RegUpdate acc)
@@ -103,3 +110,5 @@ playerMatches astate p i = query astate $ PlayersMatches p i
 entireSetGet :: AcidState TrackerDB -> IO (IxSet Match)
 entireSetGet astate = query astate EntireSet
 
+doRatings :: AcidState TrackerDB -> IO ()
+doRatings astate = A.update astate ConductRatings
