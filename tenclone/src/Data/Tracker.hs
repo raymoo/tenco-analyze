@@ -12,6 +12,7 @@ module Data.Tracker (
                     , playerMatches
                     , tryToLogin
                     , entireSetGet
+                    , doRatings
                     ) where
 
 import           Control.Applicative

@@ -45,6 +45,9 @@ import           Snap.Util.FileServe
 import           Templates.Soku
 import           Text.Blaze.Html.Renderer.Utf8 (renderHtml)
 
+updateRatings :: AcidState TrackerDB -> IO ()
+updateRatings = doRatings
+
 main :: IO ()
 main = openLocalState emptyDB >>=
        quickHttpServe . site
@@ -61,6 +64,7 @@ site astate =
           , ("api/track_record", matchRecordHandler astate)
           , ("search", accountHandler astate)
           , ("game/:id/account/:username", accountHandler astate)
+          , ("api/testrating", liftIO $ updateRatings astate)
           ] <|>
     (codeReason 404 "Not Found" >>
     writeBS "There is nothing here.") <|>
