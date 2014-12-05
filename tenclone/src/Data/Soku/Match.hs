@@ -12,7 +12,7 @@ module Data.Soku.Match (
                        , OpponentName(..)
                        , requestToMatch
                        , matchInsert
-                       , advanceRating
+                       , rateAccounts
                        )where
 
 import           Control.Applicative
@@ -20,6 +20,8 @@ import           Data.Data
 import           Data.Foldable       (foldMap)
 import           Data.IxSet
 import qualified Data.IxSet          as I
+import           Data.List           (foldl')
+import qualified Data.Map            as M
 import           Data.Maybe          (listToMaybe, mapMaybe)
 import           Data.Rating.Glicko
 import           Data.SafeCopy
@@ -160,10 +162,12 @@ matchInsert new set =
                  I.delete match $ set
      where updated =
              match { mMatched = Unranked
-                   , mOpponentHandle = Just $ mPlayerName new }
+                   , mOpponentHandle = Just $ mPlayerName new
+                   , oRating = Just $ pRating new }
            new' =
              new { mMatched = Unranked
-                 , mOpponentHandle = Just $ mPlayerName match }
+                 , mOpponentHandle = Just $ mPlayerName match
+                 , oRating = Just $ pRating match }
   where timeRange = (addUTCTime (-60) newTime, addUTCTime 60 newTime)
         newTime = mTime new
         possibleMatch = listToMaybe .
@@ -190,3 +194,22 @@ mToO Match { mWon = won, oRating = o } = fmap (, wlt) o
 
 advanceARating :: [Match] -> Rating -> Rating
 advanceARating = advanceRating . mapMaybe mToO
+
+-- | Factors any matched but unranked matches
+rateAccounts :: M.Map a Account -> IxSet Match -> (M.Map a Account, IxSet Match)
+rateAccounts accs ms = (accs', ms')
+  where unranked = I.getEQ Unranked ms
+        updateAcc acc = let matches = I.toList .
+                                      I.getEQ (PlayerName $ accName acc) $
+                                      unranked
+                            r' = advanceARating matches (accRating acc)
+                        in acc { accRating = r' }
+        accs' = M.map updateAcc accs
+        ms' = let urList = I.toList unranked
+                  rList = map rank $ I.toList unranked
+                  addMatches add old = foldl' (flip I.insert) old add
+                  delMatches del old = foldl' (flip I.delete) old del
+              in addMatches rList .
+                 delMatches urList $
+                 ms
+        rank m = m { mMatched = Ranked }
