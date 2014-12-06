@@ -91,7 +91,10 @@ playerTitle :: GameId -> Username -> M.Map Character Rating -> Html
 playerTitle gid uname ratings = do
   h1 $ toHtml $ uname `append` "'s profile"
   br
-  toHtml $ "Game: " `append` (T.pack $ show gid)
+  h2 $ toHtml $ "Game: " `append` (T.pack $ show gid)
+  br
+  br
+  h2 $ toHtml $ wombo "Scores: "
   br
   ratingTable ratings
 
