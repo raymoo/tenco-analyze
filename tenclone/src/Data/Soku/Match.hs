@@ -111,7 +111,7 @@ requestToMatch acc (MatchResult timestamp
                                  , oRating         = Nothing
                                  }
           username = accName acc
-          rating = accRating acc
+          rating = M.findWithDefault defRating p1Char $ accRating acc
 $(deriveSafeCopy 0 'base ''Match)
 
 newtype PlayerName = PlayerName Text
@@ -195,14 +195,25 @@ mToO Match { mWon = won, oRating = o } = fmap (, wlt) o
 advanceARating :: [Match] -> Rating -> Rating
 advanceARating = advanceRating . mapMaybe mToO
 
+advanceRatings :: M.Map Character [Match] -> M.Map Character Rating ->
+                  M.Map Character Rating
+advanceRatings ms rs = foldl' oneRating M.empty [minBound..maxBound]
+  where oneRating ms' char =
+          let r        = M.findWithDefault defRating char rs
+              cMatches = M.findWithDefault [] char ms
+              r'       = advanceARating cMatches r
+          in M.insert char r' ms'
+
 -- | Factors any matched but unranked matches
 rateAccounts :: M.Map a Account -> IxSet Match -> (M.Map a Account, IxSet Match)
 rateAccounts accs ms = (accs', ms')
   where unranked = I.getEQ Unranked ms
-        updateAcc acc = let matches = I.toList .
+        updateAcc acc = let matches :: M.Map Character [Match]
+                            matches = M.fromAscList .
+                                      I.groupAscBy .
                                       I.getEQ (PlayerName $ accName acc) $
                                       unranked
-                            r' = advanceARating matches (accRating acc)
+                            r' = advanceRatings matches (accRating acc)
                         in acc { accRating = r' }
         accs' = M.map updateAcc accs
         ms' = let stripped  = I.getRange Unmatched Ranked ms  -- no unranked

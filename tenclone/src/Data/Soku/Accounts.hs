@@ -36,9 +36,10 @@ import           Crypto.Hash
 import           Data.ByteString.Char8 as BS (pack)
 import           Data.Data
 import           Data.Map              as Map (Map, empty, insert, lookup,
-                                               member)
+                                               member, fromAscList)
 import           Data.Rating.Glicko
 import           Data.SafeCopy
+import           Data.Soku
 import           Data.Soku.Requests
 import           Data.Text             as T
 
@@ -47,7 +48,7 @@ data Account =
   Account { accName   :: Text
           , accPass   :: Text
           , accMail   :: Text
-          , accRating :: Rating
+          , accRating :: Map Character Rating
           } 
   deriving (Show, Data, Typeable)
 
@@ -109,5 +110,6 @@ reqToAcc (NewAccountReq name pass mail) =
   Account { accName   = name
           , accPass   = pass
           , accMail   = mail
-          , accRating = defRating
+          , accRating =
+              fromAscList $ Prelude.zip [minBound..maxBound] (repeat defRating)
           } 

@@ -23,6 +23,7 @@ module Templates.Soku(
                      , playerPage
                      ) where
 
+import qualified Data.Map                    as M
 import           Data.Rating.Glicko          (Rating(..))
 import           Data.Soku
 import           Data.Soku.Accounts          (Account(..))
@@ -86,16 +87,26 @@ profileLink :: Username -> IDText -> Text -> Html
 profileLink pName gid text = a ! href (textValue profAddress) $ toHtml text
   where profAddress = "/game/" `T.append` gid `T.append` "/account/" `T.append` pName
 
-playerTitle :: GameId -> Username -> Rating -> Html
-playerTitle gid uname rating = do
+playerTitle :: GameId -> Username -> M.Map Character Rating -> Html
+playerTitle gid uname ratings = do
   h1 $ toHtml $ uname `append` "'s profile"
   br
   toHtml $ "Game: " `append` (T.pack $ show gid)
   br
-  toHtml $ "Score: " `append` (T.pack $ show (round $ rScore rating)) `append`
-                              " (+/-" `append`
-                              (T.pack $ show (round $ rDev rating)) `append`
-                              ")"
+  ratingTable ratings
+
+ratingTable :: M.Map Character Rating -> Html
+ratingTable rs =
+  let pairs = M.toList rs
+      row (c, r) = tr $ do
+        td $ toHtml $ show c
+        td $ toHtml $ show r
+      header = do
+        td $ toHtml $ wombo "Character"
+        td $ toHtml $ wombo "Rating"
+  in table $ do
+       tr header
+       mapM_ row pairs
 
 playerPage :: GameId -> Account -> [Match] -> Html
 playerPage gid acc ms =
