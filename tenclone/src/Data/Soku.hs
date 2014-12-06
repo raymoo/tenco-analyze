@@ -89,14 +89,21 @@ parseCharacter t = case t of
                      "0"  -> Just Reimu
                      "1"  -> Just Marisa
                      "2"  -> Just Sakuya
+                     "3"  -> Just Alice
                      "4"  -> Just Patchouli
                      "5"  -> Just Youmu
+                     "6"  -> Just Remilia
                      "7"  -> Just Yuyuko
                      "8"  -> Just Yukari
                      "9"  -> Just Suika
+                     "10" -> Just Reisen
+                     "11" -> Just Aya
+                     "12" -> Just Komachi
                      "13" -> Just Iku
                      "14" -> Just Tenshi
+                     "15" -> Just Sanae -- is a good girl
+                     "16" -> Just Cirno
                      "17" -> Just Meiling
                      "18" -> Just Utsuho
-                     _    -> Just Sanae -- is a good girl (replace with Nothing when
-                                        -- character ids are filled out completely
+                     "19" -> Just Suwako
+                     _    -> Nothing
