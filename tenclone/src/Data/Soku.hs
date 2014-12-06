@@ -53,7 +53,7 @@ data Character = Suika
                | Komachi
                | Iku
                | Tenshi
-                 deriving (Eq, Ord, Show, Data, Typeable)
+                 deriving (Eq, Ord, Enum, Bounded, Show, Data, Typeable)
 
 $(deriveSafeCopy 0 'base ''Character)
 
