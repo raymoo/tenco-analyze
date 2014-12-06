@@ -19,7 +19,11 @@ data Rating =
          , rTime  :: Int    -- rating periods since last competition
                             -- rTime = 1 if the player played last rating period
          }
-  deriving (Show, Eq, Ord, Data, Typeable)
+  deriving (Eq, Ord, Data, Typeable)
+
+instance Show Rating where
+  show (Rating score dev _) =
+    show (round score) ++ "+/-" ++ show (round dev)
 
 deriveSafeCopy 0 'base ''Rating
 
