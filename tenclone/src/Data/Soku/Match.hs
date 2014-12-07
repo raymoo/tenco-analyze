@@ -37,8 +37,8 @@ import           Data.Tuple          (swap)
 -- Unranked = Hasn't been factored into ranking yet
 -- Ranked = Has been factored into rating
 data Matching = Unmatched
-              | Unranked
               | Ranked
+              | Unranked
                 deriving (Eq, Ord, Show, Data, Typeable)
 
 $(deriveSafeCopy 0 'base ''Matching)
@@ -216,7 +216,8 @@ rateAccounts accs ms = (accs', ms')
                             r' = advanceRatings matches (accRating acc)
                         in acc { accRating = r' }
         accs' = M.map updateAcc accs
-        ms' = let stripped  = I.getRange Unmatched Ranked ms  -- no unranked
+        ms' = let stripped  = I.getRange Unmatched Unranked ms  -- only Unmatched
+                                                                -- and Ranked
                   rList = map rank $ I.toList unranked
                   addMatches old = foldl' (flip I.insert) old rList
                  in addMatches stripped
