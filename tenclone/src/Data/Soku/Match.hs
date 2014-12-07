@@ -5,7 +5,7 @@
 {-# LANGUAGE TypeFamilies               #-}
 
 module Data.Soku.Match (
-                         Matching
+                         Matching(..)
                        , Match (..)
                        , PlayerName(..)
                        , PlayerHandle(..)

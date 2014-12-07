@@ -136,8 +136,9 @@ playerPage gid acc ms =
                         , mPlayerChar = pChar
                         , mOppChar = oChar
                         , mScore = score
+                        , mMatched = matched
                         } =
-              tr $ do
+              tr $ (if (matched == Unranked) then i else Prelude.id) $ do
                 let idText = showText . idToInt $ gid
                     playerHtml = toHtml $
                                  pHandle `T.append`
