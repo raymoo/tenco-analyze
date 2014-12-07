@@ -127,6 +127,7 @@ playerPage gid acc ms =
                      td $ toHtml $ wombo "Player"
                      td $ toHtml $ wombo "Score"
                      td $ toHtml $ wombo "Opponent"
+                     td $ toHtml $ wombo "Status"
                mapM_ gameRow ms
     where gameRow Match { mTime = t
                         , mPlayerHandle = pHandle
@@ -138,7 +139,7 @@ playerPage gid acc ms =
                         , mScore = score
                         , mMatched = matched
                         } =
-              tr $ (if (matched == Unranked) then i else Prelude.id) $ do
+              tr $  do
                 let idText = showText . idToInt $ gid
                     playerHtml = toHtml $
                                  pHandle `T.append`
@@ -152,6 +153,7 @@ playerPage gid acc ms =
                 td $ maybeBold won $ playerHtml
                 td $ toHtml $ scoreText score
                 td $ maybeBold (not won) $ oppHtml
+                td $ toHtml $ show matched
           scoreText (score1, score2) = (T.pack . show) score1 `T.append`
                                        " - " `T.append`
                                        (T.pack . show) score2
