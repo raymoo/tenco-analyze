@@ -30,6 +30,7 @@ module Data.Soku.Accounts(
                          , RegError(..)
                          , LoginError(..)
                          , tryLogin
+                         , initialRating
                          ) where
 
 import           Crypto.Hash
@@ -110,6 +111,8 @@ reqToAcc (NewAccountReq name pass mail) =
   Account { accName   = name
           , accPass   = pass
           , accMail   = mail
-          , accRating =
-              fromAscList $ Prelude.zip [minBound..maxBound] (repeat defRating)
+          , accRating = initialRating
           } 
+
+initialRating :: Map Character Rating
+initialRating = fromAscList $ Prelude.zip [minBound..maxBound] (repeat defRating)
