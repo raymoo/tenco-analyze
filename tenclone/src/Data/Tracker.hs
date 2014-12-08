@@ -86,7 +86,7 @@ conductRatings :: Update TrackerDB ()
 conductRatings =
   modify $ updateDB
   where updateDB (TrackerDB (AccountList as) ms) =
-          let (as', ms') = rateAccounts as ms
+          let (as', ms') = rateAccounts 1 as ms
           in TrackerDB (AccountList as') ms'
 
 ratingsCompile :: Update TrackerDB ()

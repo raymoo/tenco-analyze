@@ -102,12 +102,12 @@ newRating os rating = Rating r' rd' 0
 
 -- | Given a rating and matches in the last rating period, advances the
 -- rating
-advanceRating :: [Outcome] -> Rating -> Rating
-advanceRating os rating = newRating os .
-                          advanceDeviation .
-                          advanceTime $
-                          rating
+advanceRating :: Int -> [Outcome] -> Rating -> Rating
+advanceRating dt os rating = newRating os .
+                             advanceDeviation .
+                             advanceTime dt $
+                             rating
 
-advanceTime :: Rating -> Rating
-advanceTime r@Rating { rTime = t } =
-  r { rTime = t + 1 }
+advanceTime :: Int -> Rating -> Rating
+advanceTime dt r@Rating { rTime = t } =
+  r { rTime = t + dt }

@@ -194,34 +194,34 @@ mToO Match { mWon = won, oRating = o } = fmap (, wlt) o
                True  -> W
                False -> L
 
-advanceARating :: [Match] -> Rating -> Rating
-advanceARating = advanceRating . mapMaybe mToO
+advanceARating :: Int -> [Match] -> Rating -> Rating
+advanceARating t = advanceRating t . mapMaybe mToO
 
-advanceRatings :: M.Map Character [Match] -> M.Map Character Rating ->
+advanceRatings :: Int -> M.Map Character [Match] -> M.Map Character Rating ->
                   M.Map Character Rating
-advanceRatings ms rs = foldl' oneRating M.empty [minBound..maxBound]
+advanceRatings t ms rs = foldl' oneRating M.empty [minBound..maxBound]
   where oneRating ms' char =
           let r        = M.findWithDefault defRating char rs
               cMatches = M.findWithDefault [] char ms
-              r'       = advanceARating cMatches r
+              r'       = advanceARating t cMatches r
           in M.insert char r' ms'
 
 -- | Factors any matched but unranked matches
-rateAccounts :: M.Map a Account -> IxSet Match -> (M.Map a Account, IxSet Match)
-rateAccounts accs ms = (accs', ms')
+rateAccounts :: Int -> M.Map a Account -> IxSet Match -> (M.Map a Account, IxSet Match)
+rateAccounts t accs ms = (accs', ms')
   where unranked = I.getEQ Unranked ms
         updateAcc acc = let matches :: M.Map Character [Match]
                             matches = M.fromAscList .
                                       I.groupAscBy .
                                       I.getEQ (PlayerName $ accName acc) $
                                       unranked
-                            r' = advanceRatings matches (accRating acc)
+                            r' = advanceRatings t matches (accRating acc)
                         in acc { accRating = r' }
         accs' = M.map updateAcc accs
         ms' = let stripped  = I.getRange Unmatched Unranked ms  -- only Unmatched
                                                                 -- and Ranked
                   rList = map rank $ I.toList unranked
-                  addMatches old = foldl' (flip I.insert) old rList
+                  addMatches old = insertList rList old
                  in addMatches stripped
         rank m = m { mMatched = Ranked }
 
@@ -235,6 +235,9 @@ hour (UTCTime day seconds) =
       d = toModifiedJulianDay day * 86400
   in d + s
 
+mapFst :: (a -> a') -> [(a, b)] -> [(a', b)]
+mapFst f = map (\(a,b) -> (f a, b))
+
 -- | Much more expensive, but more accurate rating. Recalculates rating with
 -- *All* matches
 compileRating :: Ord a => M.Map a Account -> IxSet Match ->
@@ -242,21 +245,25 @@ compileRating :: Ord a => M.Map a Account -> IxSet Match ->
 compileRating accs ms = foldl' step (initial,I.empty) byHour
   where resetRating acc = acc { accRating = initialRating }
         initial = M.map resetRating accs
-        byHour = groupWithHolesOn (hour . mTime) $
+        byHour = mapFst fromInteger $ groupSkippedOn (hour . mTime) $
           I.toAscList (I.Proxy :: I.Proxy UTCTime) ms
-        step (accs'', ms'') list =
+        step (accs', ms') (t,list) =
           let newMs        = I.fromList $ map unrank list
-              (newAccs, _) = rateAccounts accs'' newMs
-          in (newAccs, I.union ms'' newMs)
+              (newAccs, _) = rateAccounts t accs' newMs
+          in (newAccs, insertList list ms')
         unrank m
           | mMatched m == Ranked = m { mMatched = Unranked }
           | otherwise            = m
 
-groupWithHolesOn :: (Enum b, Ord b) => (a -> b) -> [a] -> [[a]]
-groupWithHolesOn _ []     = []
-groupWithHolesOn f (x:xs) = group' (f x) (x:xs)
+insertList :: (Typeable a, Ord a, Indexable a) => [a] -> IxSet a -> IxSet a
+insertList as set = foldl' (flip I.insert) set as
+
+-- | Comes with how many
+groupSkippedOn :: (Num b, Ord b) => (a -> b) -> [a] -> [(b,[a])]
+groupSkippedOn _ []     = []
+groupSkippedOn f (x:xs) = group' (f x - 1) (x:xs)
   where group' _ []     = []
-        group' k (x:xs)
-          | f x == k = (x:ys) : group' (succ k) zs
-          | otherwise = [] : group' (succ k) (x:xs)
-                       where (ys,zs) = span (eqOn f x) xs
+        group' k (x:xs) = (since, x:ys) : group' current zs
+          where (ys,zs) = span (eqOn f x) xs
+                current = f x
+                since   = current - k
