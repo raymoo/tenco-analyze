@@ -13,6 +13,7 @@ module Data.Tracker (
                     , tryToLogin
                     , entireSetGet
                     , doRatings
+                    , compileRatings
                     ) where
 
 import           Control.Applicative

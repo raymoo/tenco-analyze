@@ -65,6 +65,7 @@ site astate =
           , ("search", accountHandler astate)
           , ("game/:id/account/:username", accountHandler astate)
           , ("api/testrating", liftIO $ updateRatings astate)
+          , ("api/testcompile", liftIO $ compileRatings astate)
           ] <|>
     (codeReason 404 "Not Found" >>
     writeBS "There is nothing here.") <|>
