@@ -15,10 +15,10 @@ import Data.SafeCopy
 
 -- | Glicko rating
 data Rating =
-  Rating { rScore :: Double
-         , rDev   :: Double -- deviation
-         , rTime  :: Int    -- rating periods since last competition
-                            -- rTime = 1 if the player played last rating period
+  Rating { rScore :: !Double
+         , rDev   :: !Double -- deviation
+         , rTime  :: !Int    -- rating periods since last competition
+                             -- rTime = 1 if the player played last rating period
          }
   deriving (Eq, Ord, Data, Typeable)
 

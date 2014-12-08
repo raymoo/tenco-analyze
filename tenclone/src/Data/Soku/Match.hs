@@ -47,19 +47,19 @@ $(deriveSafeCopy 0 'base ''Matching)
 
 -- | Represents a match.
 data Match = Match
-    { mTime           :: UTCTime      -- ^ What was the match's time?
-    , mGame           :: GameId       -- ^ Which game
-    , mPlayerName     :: Text         -- ^ The name of the reporting player
-    , mPlayerHandle   :: Text         -- ^ In-game name of the player
-    , mOpponentName   :: Text         -- ^ The in-game name of their opponent
-    , mOpponentHandle :: Maybe Text   -- ^ Tracker username of opponent
-    , mMatched        :: Matching     -- ^ Has a match been found?
-    , mWon            :: Bool         -- ^ Did the reporter win?
-    , mPlayerChar     :: Character    -- ^ What character p1 used
-    , mOppChar        :: Character    -- ^ Opponent character
-    , mScore          :: (Int, Int)   -- ^ Score, Reporter - Opponent
-    , pRating         :: Rating       -- ^ Player's rating when reporting
-    , oRating         :: Maybe Rating -- ^ Opponent rating
+    { mTime           :: !UTCTime        -- ^ What was the match's time?
+    , mGame           :: !GameId         -- ^ Which game
+    , mPlayerName     :: !Text           -- ^ The name of the reporting player
+    , mPlayerHandle   :: !Text           -- ^ In-game name of the player
+    , mOpponentName   :: !Text           -- ^ The in-game name of their opponent
+    , mOpponentHandle :: !(Maybe Text)   -- ^ Tracker username of opponent
+    , mMatched        :: !Matching       -- ^ Has a match been found?
+    , mWon            :: !Bool           -- ^ Did the reporter win?
+    , mPlayerChar     :: !Character      -- ^ What character p1 used
+    , mOppChar        :: !Character      -- ^ Opponent character
+    , mScore          :: !(Int, Int)     -- ^ Score, Reporter - Opponent
+    , pRating         :: !Rating         -- ^ Player's rating when reporting
+    , oRating         :: !(Maybe Rating) -- ^ Opponent rating
     } deriving (Show, Data, Typeable)
 
 instance Eq Match where

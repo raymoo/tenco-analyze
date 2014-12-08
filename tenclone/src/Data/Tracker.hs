@@ -34,8 +34,8 @@ import           Data.Time            (UTCTime)
 
 -- | All the site data
 data TrackerDB = TrackerDB
-    { accountDB :: AccountList
-    , matchDB   :: IxSet Match
+    { accountDB :: !AccountList
+    , matchDB   :: !(IxSet Match)
     }
                  deriving (Eq, Ord, Show, Data, Typeable)
 

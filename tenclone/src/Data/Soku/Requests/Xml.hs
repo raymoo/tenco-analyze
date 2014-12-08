@@ -35,12 +35,12 @@ xmlToNewAccount xml = rootNamePossibly "account" xml *>
                   (T.pack <$> childTextPossibly "password" xml)
                   (T.pack <$> childTextPossibly "mail_address" xml)
 
-data Login = Login  { logName :: T.Text
-                    , logPass :: T.Text
+data Login = Login  { logName :: !T.Text
+                    , logPass :: !T.Text
                     }
 
-data Game = Game { gid     :: T.Text
-                 , matches :: [MatchResult]
+data Game = Game { gid     :: !T.Text
+                 , matches :: ![MatchResult]
                  }
           deriving (Show)
 

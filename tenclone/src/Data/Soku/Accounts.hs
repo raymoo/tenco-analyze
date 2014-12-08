@@ -46,10 +46,10 @@ import           Data.Text             as T
 
 -- | Represents someone's account information
 data Account =
-  Account { accName   :: Text
-          , accPass   :: Text
-          , accMail   :: Text
-          , accRating :: Map Character Rating
+  Account { accName   :: !Text
+          , accPass   :: !Text
+          , accMail   :: !Text
+          , accRating :: !(Map Character Rating)
           } 
   deriving (Show, Data, Typeable)
 

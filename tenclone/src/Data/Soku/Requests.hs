@@ -34,9 +34,9 @@ type ISOTime = String
 
 -- | A request for a new account
 data NewAccountReq = NewAccountReq
-    { newName     :: Text -- ^ Username
-    , newPassword :: Text -- ^ Password
-    , newMail     :: Text -- ^ Email
+    { newName     :: !Text -- ^ Username
+    , newPassword :: !Text -- ^ Password
+    , newMail     :: !Text -- ^ Email
     } deriving (Show, Data, Typeable)
 
 -- This is necessary for being used in acid-state
@@ -49,21 +49,21 @@ instance Ord NewAccountReq where
     compare a1 a2 = compare (newName a1) (newName a2)
 
 data MatchResult = MatchResult
-    { mrTimestamp :: ISOTime   -- ^ Timestamp of the match, from tsk
-    , mrGame      :: Text      -- ^ Game id field
-    , mrP1Name    :: Text      -- ^ Name of player 1
-    , mrP1Char    :: Character -- ^ Which character player 1 used
-    , mrP1Score   :: Int       -- ^ How many rounds player 1 won
-    , mrP2Name    :: Text
-    , mrP2Char    :: Character
-    , mrP2Score   :: Int
+    { mrTimestamp :: !ISOTime   -- ^ Timestamp of the match, from tsk
+    , mrGame      :: !Text      -- ^ Game id field
+    , mrP1Name    :: !Text      -- ^ Name of player 1
+    , mrP1Char    :: !Character -- ^ Which character player 1 used
+    , mrP1Score   :: !Int       -- ^ How many rounds player 1 won
+    , mrP2Name    :: !Text
+    , mrP2Char    :: !Character
+    , mrP2Score   :: !Int
     } deriving (Show)
 
 
 data ReportLog = ReportLog
-    { rlName   :: Text          -- ^ Account name
-    , rlPass   :: Text          -- ^ Account password
-    , rlGameId :: GameId        -- ^ Which game they played
-    , rlRecord :: [MatchResult] -- ^ The log of matches
-    , rlForce  :: Bool          -- ^ Whether to force insert
+    { rlName   :: !Text          -- ^ Account name
+    , rlPass   :: !Text          -- ^ Account password
+    , rlGameId :: !GameId        -- ^ Which game they played
+    , rlRecord :: ![MatchResult] -- ^ The log of matches
+    , rlForce  :: !Bool          -- ^ Whether to force insert
     } deriving (Show)
