@@ -7,6 +7,7 @@ module Data.Rating.Glicko(
                          , WLT(..)
                          , Outcome
                          , advanceRating
+                         , advanceDeviation
                          ) where
 
 import Data.Data
@@ -103,6 +104,7 @@ newRating os rating = Rating r' rd' 0
 -- | Given a rating and matches in the last rating period, advances the
 -- rating
 advanceRating :: Int -> [Outcome] -> Rating -> Rating
+advanceRating dt [] rating = advanceTime dt rating
 advanceRating dt os rating = newRating os .
                              advanceDeviation .
                              advanceTime dt $
