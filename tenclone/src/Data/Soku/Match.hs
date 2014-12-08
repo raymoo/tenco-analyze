@@ -13,6 +13,7 @@ module Data.Soku.Match (
                        , requestToMatch
                        , matchInsert
                        , rateAccounts
+                       , compileRating
                        )where
 
 import           Control.Applicative
@@ -29,7 +30,8 @@ import           Data.Soku
 import           Data.Soku.Accounts
 import           Data.Soku.Requests
 import           Data.Text           (Text)
-import           Data.Time           (UTCTime, addUTCTime)
+import           Data.Time           (UTCTime(..), addUTCTime)
+import           Data.Time.Calendar  (toModifiedJulianDay)
 import           Data.Time.ISO8601   (parseISO8601)
 import           Data.Tuple          (swap)
 
@@ -222,3 +224,39 @@ rateAccounts accs ms = (accs', ms')
                   addMatches old = foldl' (flip I.insert) old rList
                  in addMatches stripped
         rank m = m { mMatched = Ranked }
+
+eqOn :: Eq b => (a -> b) -> a -> a -> Bool
+eqOn f x y = f x == f y
+
+-- | Floor to hour
+hour :: UTCTime -> Integer
+hour (UTCTime day seconds) =
+  let s = floor . (/3600) $ min 86399 seconds
+      d = toModifiedJulianDay day * 86400
+  in d + s
+
+-- | Much more expensive, but more accurate rating. Recalculates rating with
+-- *All* matches
+compileRating :: Ord a => M.Map a Account -> IxSet Match ->
+                 (M.Map a Account, IxSet Match)
+compileRating accs ms = foldl' step (initial,I.empty) byHour
+  where resetRating acc = acc { accRating = initialRating }
+        initial = M.map resetRating accs
+        byHour = groupWithHolesOn (hour . mTime) $
+          I.toAscList (I.Proxy :: I.Proxy UTCTime) ms
+        step (accs'', ms'') list =
+          let newMs        = I.fromList $ map unrank list
+              (newAccs, _) = rateAccounts accs'' newMs
+          in (newAccs, I.union ms'' newMs)
+        unrank m
+          | mMatched m == Ranked = m { mMatched = Unranked }
+          | otherwise            = m
+
+groupWithHolesOn :: (Enum b, Ord b) => (a -> b) -> [a] -> [[a]]
+groupWithHolesOn _ []     = []
+groupWithHolesOn f (x:xs) = group' (f x) (x:xs)
+  where group' _ []     = []
+        group' k (x:xs)
+          | f x == k = (x:ys) : group' (succ k) zs
+          | otherwise = [] : group' (succ k) (x:xs)
+                       where (ys,zs) = span (eqOn f x) xs
