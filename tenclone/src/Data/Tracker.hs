@@ -88,7 +88,13 @@ conductRatings =
           let (as', ms') = rateAccounts as ms
           in TrackerDB (AccountList as') ms'
 
-$(makeAcidic ''TrackerDB ['regUpdate, 'queryAccount, 'listOfPlayers, 'attemptLogin, 'addMatch, 'playersMatches, 'entireSet, 'conductRatings])
+ratingsCompile :: Update TrackerDB ()
+ratingsCompile = modify $ updateDB
+  where updateDB (TrackerDB (AccountList as) ms) =
+          let (as', ms') = compileRating as ms
+          in TrackerDB (AccountList as') ms'
+
+$(makeAcidic ''TrackerDB ['regUpdate, 'queryAccount, 'listOfPlayers, 'attemptLogin, 'addMatch, 'playersMatches, 'entireSet, 'conductRatings, 'ratingsCompile])
 
 registerAccount :: AcidState TrackerDB -> Account -> IO (Maybe RegError)
 registerAccount astate acc = A.update astate (RegUpdate acc)
@@ -113,3 +119,6 @@ entireSetGet astate = query astate EntireSet
 
 doRatings :: AcidState TrackerDB -> IO ()
 doRatings astate = A.update astate ConductRatings
+
+compileRatings :: AcidState TrackerDB -> IO ()
+compileRatings astate = A.update astate RatingsCompile
