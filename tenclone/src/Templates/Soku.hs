@@ -24,7 +24,7 @@ module Templates.Soku(
                      ) where
 
 import qualified Data.Map                    as M
-import           Data.Rating.Glicko          (Rating(..))
+import           Data.Rating.Glicko          (Rating(..), advanceDeviation)
 import           Data.Soku
 import           Data.Soku.Accounts          (Account(..))
 import           Data.Soku.Match
@@ -102,8 +102,9 @@ ratingTable :: M.Map Character Rating -> Html
 ratingTable rs =
   let pairs = M.toList rs
       row (c, r) = tr $ do
+        let proj = advanceDeviation r
         td $ toHtml $ show c
-        td $ toHtml $ show r
+        td $ toHtml $ show proj
       header = do
         td $ toHtml $ wombo "Character"
         td $ toHtml $ wombo "Rating"
