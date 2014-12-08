@@ -122,14 +122,19 @@ playerPage gid acc ms =
         playerTitle gid uname (accRating $ acc)
         br
         br
-        table $ do
-               tr $ do
-                     td $ toHtml $ wombo "Time"
-                     td $ toHtml $ wombo "Player"
-                     td $ toHtml $ wombo "Score"
-                     td $ toHtml $ wombo "Opponent"
-                     td $ toHtml $ wombo "Status"
-               mapM_ gameRow ms
+        matchesTable gid ms
+
+matchesTable :: GameId -> [Match] -> Html
+matchesTable _   [] = toHtml $ wombo "No matches for this game yet"
+matchesTable gid ms =
+  table $ do
+    tr $ do
+      td $ toHtml $ wombo "Time"
+      td $ toHtml $ wombo "Player"
+      td $ toHtml $ wombo "Score"
+      td $ toHtml $ wombo "Opponent"
+      td $ toHtml $ wombo "Status"
+      mapM_ gameRow ms
     where gameRow Match { mTime = t
                         , mPlayerHandle = pHandle
                         , mOpponentName = oName
@@ -140,24 +145,25 @@ playerPage gid acc ms =
                         , mScore = score
                         , mMatched = matched
                         } =
-              tr $  do
-                let idText = showText . idToInt $ gid
-                    playerHtml = toHtml $
-                                 pHandle `T.append`
-                                 " (" `T.append`
-                                 showText pChar `T.append`
-                                 ") "
-                    oppHtml = do
-                      maybe (toHtml oName) (\n -> profileLink n idText n) oHandle
-                      toHtml $ " (" `T.append` showText oChar `T.append` ") "
-                td $ toHtml $ formatISO8601 t
-                td $ maybeBold won $ playerHtml
-                td $ toHtml $ scoreText score
-                td $ maybeBold (not won) $ oppHtml
-                td $ toHtml $ show matched
+            tr $  do
+              let idText = showText . idToInt $ gid
+                  playerHtml = toHtml $
+                               pHandle `T.append`
+                               " (" `T.append`
+                               showText pChar `T.append`
+                               ") "
+                  oppHtml = do
+                    maybe (toHtml oName) (\n -> profileLink n idText n) oHandle
+                    toHtml $ " (" `T.append` showText oChar `T.append` ") "
+              td $ toHtml $ formatISO8601 t
+              td $ maybeBold won $ playerHtml
+              td $ toHtml $ scoreText score
+              td $ maybeBold (not won) $ oppHtml
+              td $ toHtml $ show matched
           scoreText (score1, score2) = (T.pack . show) score1 `T.append`
                                        " - " `T.append`
                                        (T.pack . show) score2
+
 
 maybeBold :: Bool -> Html -> Html
 maybeBold True h  = b h
