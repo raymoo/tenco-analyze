@@ -218,8 +218,7 @@ rateAccounts t accs ms = (accs', ms')
                             r' = advanceRatings t matches (accRating acc)
                         in acc { accRating = r' }
         accs' = M.map updateAcc accs
-        ms' = let stripped  = I.getRange Unmatched Unranked ms  -- only Unmatched
-                                                                -- and Ranked
+        ms' = let stripped  = I.getLT Unranked ms  -- No Unranked
                   rList = map rank $ I.toList unranked
                   addMatches old = insertList rList old
                  in addMatches stripped
