@@ -222,7 +222,8 @@ module TencoReporter
       # DateTime モジュールだと計算精度が低かったので Time モジュールを利用
       if filetime then
         base_filetime = 126227808000000000   # 2001年1月1日0時の FILETIME
-        base_time = Time.local(2001, 1, 1)
+        offset = Time.now.gmt_offset
+        base_time = Time.gm(2001, 1, 1) - offset
         time = base_time + (filetime.to_i - base_filetime) / 10.0**7
         return time.iso8601
       else
@@ -235,7 +236,8 @@ module TencoReporter
     def time_to_filetime(time)
       if time then
         base_filetime = 126227808000000000   # 2001年1月1日0時の FILETIME
-        base_time = Time.local(2001, 1, 1)
+        offset = Time.now.gmt_offset
+        base_time = Time.gm(2001, 1, 1) - offset
         return base_filetime + (time - base_time) * 10**7
       else
         return nil
