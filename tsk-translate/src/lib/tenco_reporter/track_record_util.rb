@@ -234,7 +234,7 @@ module TencoReporter
     # FILETIME は 1601年1月1日からの100ナノ秒単位でのローカル時間
     def time_to_filetime(time)
       if time then
-          base_filetime = 126227808000000000   # 2001年1月1日0時の FILETIME
+        base_filetime = 126227808000000000   # 2001年1月1日0時の FILETIME
         base_time = Time.local(2001, 1, 1)
         return base_filetime + (time - base_time) * 10**7
       else
